@@ -103,9 +103,25 @@ function importReportsFromSheet() {
       dateStr = (dateVal || "").toString();
     }
     
+    // Parse creation timestamp (createdAt) from sheet Timestamp column
+    var createdAtVal = row[0];
+    var createdAtStr = "";
+    if (createdAtVal instanceof Date) {
+      createdAtStr = createdAtVal.toISOString();
+    } else if (createdAtVal) {
+      try {
+        createdAtStr = new Date(createdAtVal).toISOString();
+      } catch (e) {
+        createdAtStr = new Date().toISOString();
+      }
+    } else {
+      createdAtStr = new Date().toISOString();
+    }
+
     // Build new report object
     var report = {
       id: id,
+      createdAt: createdAtStr,
       jobNumber: id,
       maintenanceDate: dateStr,
       customerName: row[3] || "-",
@@ -140,10 +156,10 @@ function importReportsFromSheet() {
   
   // 4. Save updated reports list back to JSON
   if (newReportsCount > 0) {
-    // Sort reports by date descending
+    // Sort reports by createdAt descending
     reportsList.sort(function(a, b) {
-      var dateA = new Date(a.maintenanceDate || 0);
-      var dateB = new Date(b.maintenanceDate || 0);
+      var dateA = new Date(a.createdAt || a.maintenanceDate || 0);
+      var dateB = new Date(b.createdAt || b.maintenanceDate || 0);
       return dateB - dateA;
     });
     

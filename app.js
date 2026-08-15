@@ -66,12 +66,9 @@ async function fetchSharedCloudReports(manualAlert = false) {
                 });
 
                 reports = Array.from(localMap.values()).sort((a, b) => {
-                    const dateA = new Date(a.maintenanceDate || a.date || a.createdAt || 0);
-                    const dateB = new Date(b.maintenanceDate || b.date || b.createdAt || 0);
-                    if (dateA.getTime() !== dateB.getTime()) {
-                        return dateB - dateA;
-                    }
-                    return (b.id || "").localeCompare(a.id || "");
+                    const timeA = new Date(a.createdAt || a.maintenanceDate || a.date || 0).getTime();
+                    const timeB = new Date(b.createdAt || b.maintenanceDate || b.date || 0).getTime();
+                    return timeB - timeA;
                 });
 
                 saveReportsToLocalStorage();
@@ -864,12 +861,9 @@ function renderHistoryTable(filteredList = null) {
     const listContainer = document.getElementById("history-reports-list");
     const sourceList = filteredList || reports;
     const sorted = [...sourceList].sort((a, b) => {
-        const dateA = new Date(a.maintenanceDate);
-        const dateB = new Date(b.maintenanceDate);
-        if (dateA.getTime() !== dateB.getTime()) {
-            return dateB - dateA;
-        }
-        return (b.id || "").localeCompare(a.id || "");
+        const timeA = new Date(a.createdAt || a.maintenanceDate || a.date || 0).getTime();
+        const timeB = new Date(b.createdAt || b.maintenanceDate || b.date || 0).getTime();
+        return timeB - timeA;
     });
 
     if (sorted.length === 0) {
@@ -1158,8 +1152,17 @@ function initFormHandlers() {
             reportId = `SR-${dateStr}-${paddedCount}`;
         }
 
+        let originalCreatedAt = new Date().toISOString();
+        if (editingReportId) {
+            const oldReport = reports.find(r => r.id === editingReportId);
+            if (oldReport && oldReport.createdAt) {
+                originalCreatedAt = oldReport.createdAt;
+            }
+        }
+
         const newReport = {
             id: reportId,
+            createdAt: originalCreatedAt,
             customerName,
             technicianName,
             technicians: selectedTechs,
