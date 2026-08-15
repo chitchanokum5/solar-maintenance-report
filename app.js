@@ -66,9 +66,12 @@ async function fetchSharedCloudReports(manualAlert = false) {
                 });
 
                 reports = Array.from(localMap.values()).sort((a, b) => {
-                    const da = new Date(b.maintenanceDate || b.date || b.createdAt || 0);
-                    const db = new Date(a.maintenanceDate || a.date || a.createdAt || 0);
-                    return da - db;
+                    const dateA = new Date(a.maintenanceDate || a.date || a.createdAt || 0);
+                    const dateB = new Date(b.maintenanceDate || b.date || b.createdAt || 0);
+                    if (dateA.getTime() !== dateB.getTime()) {
+                        return dateB - dateA;
+                    }
+                    return (b.id || "").localeCompare(a.id || "");
                 });
 
                 saveReportsToLocalStorage();
@@ -860,7 +863,14 @@ function renderReportsTable() {
 function renderHistoryTable(filteredList = null) {
     const listContainer = document.getElementById("history-reports-list");
     const sourceList = filteredList || reports;
-    const sorted = [...sourceList].sort((a, b) => new Date(b.maintenanceDate) - new Date(a.maintenanceDate));
+    const sorted = [...sourceList].sort((a, b) => {
+        const dateA = new Date(a.maintenanceDate);
+        const dateB = new Date(b.maintenanceDate);
+        if (dateA.getTime() !== dateB.getTime()) {
+            return dateB - dateA;
+        }
+        return (b.id || "").localeCompare(a.id || "");
+    });
 
     if (sorted.length === 0) {
         listContainer.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">ไม่พบข้อมูลประวัติรายงาน</td></tr>`;
