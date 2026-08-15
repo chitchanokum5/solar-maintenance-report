@@ -12,6 +12,19 @@ let editingReportId = null;
 let maintenanceTypeChart = null;
 let issueTypeChart = null;
 
+function getSortTime(r) {
+    if (r.createdAt) {
+        return new Date(r.createdAt).getTime();
+    }
+    let counter = 0;
+    const match = (r.id || "").match(/-(\d+)$/);
+    if (match) {
+        counter = parseInt(match[1], 10);
+    }
+    const baseTime = new Date(r.maintenanceDate || r.date || 0).getTime();
+    return baseTime + (counter * 1000);
+}
+
 // ==========================================
 // SHARED CLOUD DATABASE SYNC (SAFE MERGE & LOCAL FIRST)
 // ==========================================
@@ -65,11 +78,7 @@ async function fetchSharedCloudReports(manualAlert = false) {
                     }
                 });
 
-                reports = Array.from(localMap.values()).sort((a, b) => {
-                    const timeA = new Date(a.createdAt || a.maintenanceDate || a.date || 0).getTime();
-                    const timeB = new Date(b.createdAt || b.maintenanceDate || b.date || 0).getTime();
-                    return timeB - timeA;
-                });
+                reports = Array.from(localMap.values()).sort((a, b) => getSortTime(b) - getSortTime(a));
 
                 saveReportsToLocalStorage();
 
@@ -860,11 +869,7 @@ function renderReportsTable() {
 function renderHistoryTable(filteredList = null) {
     const listContainer = document.getElementById("history-reports-list");
     const sourceList = filteredList || reports;
-    const sorted = [...sourceList].sort((a, b) => {
-        const timeA = new Date(a.createdAt || a.maintenanceDate || a.date || 0).getTime();
-        const timeB = new Date(b.createdAt || b.maintenanceDate || b.date || 0).getTime();
-        return timeB - timeA;
-    });
+    const sorted = [...sourceList].sort((a, b) => getSortTime(b) - getSortTime(a));
 
     if (sorted.length === 0) {
         listContainer.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">ไม่พบข้อมูลประวัติรายงาน</td></tr>`;
