@@ -15,13 +15,16 @@ let issueTypeChart = null;
 // ==========================================
 // SHARED CLOUD DATABASE SYNC (SAFE MERGE & LOCAL FIRST)
 // ==========================================
-const SHARED_CLOUD_ENDPOINT = "https://jsonblob.com/api/jsonBlob/019f8e08-f899-788c-acdf-a46c7cee6d2a";
+function getCloudEndpoint() {
+    return localStorage.getItem("google_drive_webhook_url") || "https://script.google.com/macros/s/AKfycbw7MbWrRJDM5zK_cYmc2ZAi1QpxSfE2FIvtXuFj-9cc47hz_rJjoLYNoKmsGoOT6VA/exec";
+}
 let isCloudSyncing = false;
 
 async function fetchSharedCloudReports(manualAlert = false) {
     if (isCloudSyncing) return;
     try {
-        const res = await fetch(SHARED_CLOUD_ENDPOINT + "?nocache=" + Date.now());
+        const endpoint = getCloudEndpoint();
+        const res = await fetch(endpoint + "?action=getReports&nocache=" + Date.now());
         if (res.ok) {
             const data = await res.json();
             if (Array.isArray(data)) {
@@ -47,9 +50,9 @@ async function fetchSharedCloudReports(manualAlert = false) {
                                                  (localReport.cmImagesAfter && localReport.cmImagesAfter.length > 0);
                             
                             const hasRemotePhotos = (remoteReport.imagesInverterRoom && remoteReport.imagesInverterRoom.length > 0) || 
-                                                  (remoteReport.imagesRooftop && remoteReport.imagesRooftop.length > 0) ||
-                                                  (remoteReport.cmImagesBefore && remoteReport.cmImagesBefore.length > 0) ||
-                                                  (remoteReport.cmImagesAfter && remoteReport.cmImagesAfter.length > 0);
+                                                   (remoteReport.imagesRooftop && remoteReport.imagesRooftop.length > 0) ||
+                                                   (remoteReport.cmImagesBefore && remoteReport.cmImagesBefore.length > 0) ||
+                                                   (remoteReport.cmImagesAfter && remoteReport.cmImagesAfter.length > 0);
 
                             if (hasLocalPhotos && !hasRemotePhotos) {
                                 remoteReport.imagesInverterRoom = localReport.imagesInverterRoom;
@@ -84,11 +87,6 @@ async function fetchSharedCloudReports(manualAlert = false) {
                     alert(`ซิงค์ข้อมูลสำเร็จ! ปัจจุบันมีรายงานในระบบรวมทั้งหมด ${reports.length} ฉบับ`);
                 }
             }
-        } else if (res.status === 404) {
-            console.log("Cloud database expired/not found. Auto-healing by uploading local reports...");
-            if (reports.length > 0) {
-                saveSharedCloudReports();
-            }
         }
     } catch (e) {
         console.log("Shared Cloud fetch error:", e);
@@ -101,8 +99,9 @@ async function fetchSharedCloudReports(manualAlert = false) {
 async function saveSharedCloudReports() {
     isCloudSyncing = true;
     try {
+        const endpoint = getCloudEndpoint();
         // Fetch current remote data first to prevent overwriting other technicians' reports
-        const res = await fetch(SHARED_CLOUD_ENDPOINT + "?nocache=" + Date.now());
+        const res = await fetch(endpoint + "?action=getReports&nocache=" + Date.now());
         let currentCloudReports = [];
         if (res.ok) {
             const remoteData = await res.json();
@@ -116,10 +115,10 @@ async function saveSharedCloudReports() {
         reports = Array.from(mergedMap.values());
         saveReportsToLocalStorage();
 
-        await fetch(SHARED_CLOUD_ENDPOINT, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(reports)
+        await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "saveReports", reports: reports })
         });
     } catch (e) {
         console.log("Shared Cloud save error:", e);

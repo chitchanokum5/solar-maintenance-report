@@ -3,20 +3,59 @@
  * 
  * Instructions:
  * 1. Open https://script.google.com/
- * 2. Click "New Project"
+ * 2. Click "New Project" (or open existing project)
  * 3. Delete any default code and paste this script
  * 4. Click "Save" (disk icon)
- * 5. Click "Deploy" -> "New deployment"
+ * 5. Click "Deploy" -> "New deployment" (or "Manage deployments" -> edit to create "New version")
  * 6. Select type: "Web app"
  * 7. Configure:
- *    - Description: Solar Report Sync
+ *    - Description: Solar Report Sync & Database
  *    - Execute as: "Me" (your email)
  *    - Who has access: "Anyone" (crucial for API access)
  * 8. Click "Deploy", authorize permissions, and copy the "Web app URL"
  * 9. Paste this URL into the Settings modal of the Solar Maintenance app!
  */
 
+// Google Drive folder ID shared by user
+var FOLDER_ID = "1hEiKDf8VtQpIOOCX7kZxaXAn0e4TxpVT";
+
+// Helper to read database JSON from Google Drive
+function getReportsJson() {
+  var mainFolder = DriveApp.getFolderById(FOLDER_ID);
+  var files = mainFolder.getFilesByName("reports_db.json");
+  if (files.hasNext()) {
+    var file = files.next();
+    return file.getAs("application/json").getDataAsString();
+  }
+  return "[]";
+}
+
+// Helper to write database JSON to Google Drive
+function saveReportsJson(jsonString) {
+  var mainFolder = DriveApp.getFolderById(FOLDER_ID);
+  var files = mainFolder.getFilesByName("reports_db.json");
+  if (files.hasNext()) {
+    var file = files.next();
+    file.setContent(jsonString);
+  } else {
+    mainFolder.createFile("reports_db.json", jsonString, "application/json");
+  }
+}
+
 function doGet(e) {
+  // Check if it is fetching reports database
+  if (e && e.parameter && e.parameter.action === "getReports") {
+    try {
+      var data = getReportsJson();
+      return ContentService.createTextOutput(data).setMimeType(ContentService.MimeType.JSON);
+    } catch (error) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        message: error.toString()
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
   return HtmlService.createHtmlOutput(
     "<html><head><title>KKE Solar Sync API</title>" +
     "<meta charset='UTF-8'>" +
@@ -41,19 +80,22 @@ function doPost(e) {
   try {
     // Parse incoming JSON
     var data = JSON.parse(e.postData.contents);
+    
+    // Check if it is saving reports database
+    if (data && data.action === "saveReports") {
+      saveReportsJson(JSON.stringify(data.reports));
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        message: "Database synced successfully!"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
     var fileName = data.fileName || "Solar_Report.pdf";
     var pdfData = data.pdfData; // Base64 PDF string
     var metadata = data.metadata || {};
     
-    // 1. Get or create main Google Drive folder
-    var mainFolderName = "KKE Solar Maintenance Reports";
-    var mainFolders = DriveApp.getFoldersByName(mainFolderName);
-    var mainFolder;
-    if (mainFolders.hasNext()) {
-      mainFolder = mainFolders.next();
-    } else {
-      mainFolder = DriveApp.createFolder(mainFolderName);
-    }
+    // 1. Get Google Drive folder by ID
+    var mainFolder = DriveApp.getFolderById(FOLDER_ID);
     
     // Extract list of all technicians listed on the report
     var techList = [];
