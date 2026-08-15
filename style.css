@@ -1459,6 +1459,18 @@ input[type="range"]::-webkit-slider-thumb:hover {
    PRINT MEDIA RULES (FOR BROWSER PRINT)
    ========================================== */
 @media print {
+    /* Override theme color variables during print to enforce clean black & white format */
+    :root, [data-theme] {
+        --bg-main: #ffffff !important;
+        --bg-sidebar: #ffffff !important;
+        --bg-card: #ffffff !important;
+        --border-color: #cbd5e1 !important;
+        --text-primary: #0f172a !important;
+        --text-secondary: #334155 !important;
+        --text-muted: #64748b !important;
+        --primary-solar: #b45309 !important;
+    }
+
     @page {
         size: A4 portrait;
         margin: 0mm 10mm 10mm 10mm !important;
@@ -1483,6 +1495,9 @@ input[type="range"]::-webkit-slider-thumb:hover {
         min-height: 0 !important;
         position: static !important;
         display: block !important;
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
     }
 
     body * {
