@@ -2,18 +2,10 @@
  * Google Apps Script Web App Endpoint for KKE Solar Maintenance Report
  * 
  * Instructions:
- * 1. Open https://script.google.com/
- * 2. Click "New Project" (or open existing project)
- * 3. Delete any default code and paste this script
- * 4. Click "Save" (disk icon)
- * 5. Click "Deploy" -> "New deployment" (or "Manage deployments" -> edit to create "New version")
- * 6. Select type: "Web app"
- * 7. Configure:
- *    - Description: Solar Report Sync & Database
- *    - Execute as: "Me" (your email)
- *    - Who has access: "Anyone" (crucial for API access)
- * 8. Click "Deploy", authorize permissions, and copy the "Web app URL"
- * 9. Paste this URL into the Settings modal of the Solar Maintenance app!
+ * 1. Open https://script.google.com/home/projects/1kRVp5_6UcFCcPJpFpA9nbEQoPPtjTqDkKIMQw-EkwwPxL71wza0y9qiq/edit
+ * 2. Delete any default code and paste this script
+ * 3. Click "Save" (disk icon)
+ * 4. Click "Deploy" -> "Manage deployments" -> Edit -> Select Version: "New version" -> Click "Deploy"
  */
 
 // Google Drive folder ID shared by user
@@ -21,6 +13,13 @@ var FOLDER_ID = "1hEiKDf8VtQpIOOCX7kZxaXAn0e4TxpVT";
 
 // Helper to read database JSON from Google Drive
 function getReportsJson() {
+  // Automatically import any new historical rows from the Google Sheet logs first
+  try {
+    importReportsFromSheet();
+  } catch (err) {
+    Logger.log("Import from sheet failed: " + err.toString());
+  }
+
   var mainFolder = DriveApp.getFolderById(FOLDER_ID);
   var files = mainFolder.getFilesByName("reports_db.json");
   if (files.hasNext()) {
@@ -39,6 +38,121 @@ function saveReportsJson(jsonString) {
     file.setContent(jsonString);
   } else {
     mainFolder.createFile("reports_db.json", jsonString, "application/json");
+  }
+}
+
+// Automatically import reports from the Google Sheet logs to the JSON database
+function importReportsFromSheet() {
+  var mainFolder = DriveApp.getFolderById(FOLDER_ID);
+  
+  // 1. Get Google Sheet file
+  var sheetName = "KKE Solar Maintenance Logs";
+  var files = mainFolder.getFilesByName(sheetName);
+  if (!files.hasNext()) return;
+  
+  var fileSpreadsheet = files.next();
+  var spreadsheet = SpreadsheetApp.openById(fileSpreadsheet.getId());
+  var sheet = spreadsheet.getSheets()[0];
+  var lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return; // Only header row exists
+  
+  // 2. Read all rows (from row 2 down to lastRow)
+  var values = sheet.getRange(2, 1, lastRow - 1, 11).getValues();
+  
+  // 3. Read existing JSON database file
+  var jsonFile;
+  var reportsList = [];
+  var filesJson = mainFolder.getFilesByName("reports_db.json");
+  if (filesJson.hasNext()) {
+    jsonFile = filesJson.next();
+    try {
+      reportsList = JSON.parse(jsonFile.getAs("application/json").getDataAsString());
+    } catch (e) {
+      reportsList = [];
+    }
+  }
+  
+  // Build a set of existing report IDs
+  var existingIds = {};
+  reportsList.forEach(function(r) {
+    if (r && r.id) existingIds[r.id] = true;
+  });
+  
+  var newReportsCount = 0;
+  for (var i = 0; i < values.length; i++) {
+    var row = values[i];
+    var id = row[1] || ""; // Job Number
+    if (!id || id.trim() === "" || id === "-") {
+      // Fallback ID if Job Number is missing
+      id = "SR-TEMP-" + i;
+    }
+    
+    // If this report already exists in the JSON, skip it
+    if (existingIds[id]) continue;
+    
+    // Parse system size (kWp)
+    var sizeVal = row[5] || 0;
+    var size = parseFloat(sizeVal.toString().replace(/[^0-9.]/g, "")) || 0;
+    
+    // Parse maintenance date
+    var dateVal = row[2];
+    var dateStr = "";
+    if (dateVal instanceof Date) {
+      dateStr = Utilities.formatDate(dateVal, Session.getScriptTimeZone(), "yyyy-MM-dd");
+    } else {
+      dateStr = (dateVal || "").toString();
+    }
+    
+    // Build new report object
+    var report = {
+      id: id,
+      jobNumber: id,
+      maintenanceDate: dateStr,
+      customerName: row[3] || "-",
+      location: row[4] || "-",
+      systemSize: size,
+      maintenanceType: row[6] || "Preventive Maintenance",
+      technicianName: row[7] || "-",
+      status: row[8] || "Normal",
+      recommendations: row[9] || "-",
+      pdfUrl: row[10] || "",
+      checks: {},
+      inverters: []
+    };
+    
+    // Set default checks to Pass for checklist items to avoid empty checks UI
+    report.checks = {
+      panelsCracks: "Pass", panelsDirt: "Pass", panelsShifting: "Pass", panelsMpptVolt: "Pass", panelsMpptCurrent: "Pass", panelsDcWiring: "Pass", panelsMc4: "Pass", panelsClamps: "Pass", panelsGround: "Pass",
+      ajbTerminalConn: "Pass", ajbTerminalTemp: "Pass", ajbFuseConn: "Pass", ajbFuseTemp: "Pass", ajbSpdConn: "Pass", ajbSpdTemp: "Pass", ajbSwitchConn: "Pass", ajbSwitchTemp: "Pass", ajbCleanliness: "Pass",
+      inverterTemp: "Pass", inverterMc4: "Pass",
+      mdbMainMccbConn: "Pass", mdbMainMccbTemp: "Pass", mdbSpdConn: "Pass", mdbSpdTemp: "Pass", mdbBranchMccbConn: "Pass", mdbBranchMccbTemp: "Pass", mdbSelector: "Pass", mdbPqMeter: "Pass", mdbCleanliness: "Pass",
+      rsdIntact: "Pass", rsdMounting: "Pass", rsdCableClip: "Pass", rsdSaltStain: "Pass", rsdConnRsd: "Pass", rsdConnPv: "Pass", rsdTemp: "Pass", rsdVoltageRange: "Pass", rsdVoltageString: "Pass",
+      optIntact: "Pass", optMounting: "Pass", optCableClip: "Pass", optConnector: "Pass", optConnOpt: "Pass", optVoltage: "Pass",
+      ctrlClean: "Pass", ctrlMounting: "Pass", ctrlVoltIn: "Pass", ctrlVoltOut: "Pass", ctrlEmergencyTest: "Pass", ctrlTerminal: "Pass",
+      weatherPhysical: "Pass", weatherSensorClean: "Pass", weatherTerminal: "Pass", weatherConverter: "Pass", weatherSignalOut: "Pass", weatherSignalIn: "Pass", weatherSupport: "Pass", weatherCalib: "Pass",
+      waterPumpUsable: "Pass", waterPumpRun: "Pass", waterCabinet: "Pass", waterCabinetDevice: "Pass", waterPipes: "Pass"
+    };
+    
+    reportsList.push(report);
+    existingIds[id] = true;
+    newReportsCount++;
+  }
+  
+  // 4. Save updated reports list back to JSON
+  if (newReportsCount > 0) {
+    // Sort reports by date descending
+    reportsList.sort(function(a, b) {
+      var dateA = new Date(a.maintenanceDate || 0);
+      var dateB = new Date(b.maintenanceDate || 0);
+      return dateB - dateA;
+    });
+    
+    var jsonContent = JSON.stringify(reportsList);
+    if (jsonFile) {
+      jsonFile.setContent(jsonContent);
+    } else {
+      mainFolder.createFile("reports_db.json", jsonContent, "application/json");
+    }
   }
 }
 
