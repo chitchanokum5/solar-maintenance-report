@@ -3636,7 +3636,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnSidebarDrive = document.getElementById("btn-sidebar-drive");
     if (btnSidebarDrive) {
         btnSidebarDrive.addEventListener("click", () => {
-            const savedFolderUrl = localStorage.getItem("google_drive_main_folder_url") || "https://drive.google.com/drive/u/0/folders/1hEiKDF8VtQpIOOCX7kZxaXAn0e4TxpVT";
+            const savedFolderUrl = localStorage.getItem("google_drive_main_folder_url") || "https://drive.google.com/drive/folders/1hEiKDf8VtQpIOOCX7kZxaXAn0e4TxpVT";
             window.open(savedFolderUrl, "_blank");
         });
     }
