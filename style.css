@@ -1615,11 +1615,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
     height: 16px;
 }
 
-/* Checklist 2-Column Grid Layout */
+/* Checklist 2-Column Column Layout (Masonry Flow) */
 #checklist-form-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    display: block;
+    columns: 2;
+    column-gap: 1.5rem;
 }
 
 .checklist-section {
@@ -1627,12 +1627,15 @@ input[type="range"]::-webkit-slider-thumb:hover {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-md);
     padding: 1.25rem;
-    margin-bottom: 0 !important; /* Managed by grid gap */
+    margin-bottom: 1.5rem !important; /* Managed by bottom margin for column flow */
+    break-inside: avoid;
+    display: inline-block;
+    width: 100%;
 }
 
 @media (max-width: 992px) {
     #checklist-form-container {
-        grid-template-columns: 1fr;
+        columns: 1;
     }
 }
 
