@@ -33,30 +33,103 @@ function getCloudEndpoint() {
 }
 let isCloudSyncing = false;
 
-// Global Loading Overlay helpers
+// Global Loading Overlay & Progress Bar helpers
+let globalProgressInterval = null;
+let driveProgressInterval = null;
+
 function showGlobalLoading(title = "กำลังดำเนินการ...", message = "โปรดรอสักครู่ ระบบกำลังดำเนินรายการ") {
     const overlay = document.getElementById("global-loading-overlay");
     const titleEl = document.getElementById("global-loading-title");
     const msgEl = document.getElementById("global-loading-message");
+    const bar = document.getElementById("global-loading-progress-bar");
+    const pct = document.getElementById("global-loading-percentage");
+    
     if (overlay) {
         if (titleEl) titleEl.innerText = title;
         if (msgEl) msgEl.innerText = message;
+        if (bar) bar.style.width = "0%";
+        if (pct) pct.innerText = "0%";
         overlay.style.display = "flex";
     }
 }
 
+function updateGlobalProgress(percent) {
+    const bar = document.getElementById("global-loading-progress-bar");
+    const pct = document.getElementById("global-loading-percentage");
+    if (bar) bar.style.width = `${percent}%`;
+    if (pct) pct.innerText = `${percent}%`;
+}
+
+function animateGlobalProgress(targetPercent, durationMs = 1500) {
+    if (globalProgressInterval) clearInterval(globalProgressInterval);
+    
+    const bar = document.getElementById("global-loading-progress-bar");
+    const pct = document.getElementById("global-loading-percentage");
+    if (!bar || !pct) return;
+    
+    const currentPercent = parseFloat(pct.innerText) || 0;
+    const stepTime = 30; // 30ms steps
+    const numSteps = durationMs / stepTime;
+    const stepAmount = (targetPercent - currentPercent) / numSteps;
+    let step = 0;
+    
+    globalProgressInterval = setInterval(() => {
+        step++;
+        let nextPercent = Math.min(targetPercent, Math.round(currentPercent + (step * stepAmount)));
+        bar.style.width = `${nextPercent}%`;
+        pct.innerText = `${nextPercent}%`;
+        if (step >= numSteps || nextPercent >= targetPercent) {
+            clearInterval(globalProgressInterval);
+        }
+    }, stepTime);
+}
+
 function hideGlobalLoading() {
+    if (globalProgressInterval) clearInterval(globalProgressInterval);
     const overlay = document.getElementById("global-loading-overlay");
     if (overlay) {
         overlay.style.display = "none";
     }
 }
 
+function updateDriveProgress(percent) {
+    const bar = document.getElementById("drive-sync-progress-bar");
+    const pct = document.getElementById("drive-sync-percentage");
+    if (bar) bar.style.width = `${percent}%`;
+    if (pct) pct.innerText = `${percent}%`;
+}
+
+function animateDriveProgress(targetPercent, durationMs = 1500) {
+    if (driveProgressInterval) clearInterval(driveProgressInterval);
+    
+    const bar = document.getElementById("drive-sync-progress-bar");
+    const pct = document.getElementById("drive-sync-percentage");
+    if (!bar || !pct) return;
+    
+    const currentPercent = parseFloat(pct.innerText) || 0;
+    const stepTime = 30;
+    const numSteps = durationMs / stepTime;
+    const stepAmount = (targetPercent - currentPercent) / numSteps;
+    let step = 0;
+    
+    driveProgressInterval = setInterval(() => {
+        step++;
+        let nextPercent = Math.min(targetPercent, Math.round(currentPercent + (step * stepAmount)));
+        bar.style.width = `${nextPercent}%`;
+        pct.innerText = `${nextPercent}%`;
+        if (step >= numSteps || nextPercent >= targetPercent) {
+            clearInterval(driveProgressInterval);
+        }
+    }, stepTime);
+}
+
 async function fetchSharedCloudReports(manualAlert = false) {
     if (isCloudSyncing) return;
     if (manualAlert) {
         showGlobalLoading("กำลังซิงค์ข้อมูล...", "ระบบกำลังดึงข้อมูลรายงานล่าสุดจาก Google Drive...");
+        animateGlobalProgress(85, 2000);
     }
+    let syncSuccess = false;
     try {
         const endpoint = getCloudEndpoint();
         const res = await fetch(endpoint + "?action=getReports&nocache=" + Date.now());
@@ -115,7 +188,12 @@ async function fetchSharedCloudReports(manualAlert = false) {
                 }
 
                 if (manualAlert) {
-                    alert(`ซิงค์ข้อมูลสำเร็จ! ปัจจุบันมีรายงานในระบบรวมทั้งหมด ${reports.length} ฉบับ`);
+                    syncSuccess = true;
+                    updateGlobalProgress(100);
+                    setTimeout(() => {
+                        hideGlobalLoading();
+                        alert(`ซิงค์ข้อมูลสำเร็จ! ปัจจุบันมีรายงานในระบบรวมทั้งหมด ${reports.length} ฉบับ`);
+                    }, 400);
                 }
             }
         }
@@ -125,7 +203,7 @@ async function fetchSharedCloudReports(manualAlert = false) {
             alert("ไม่สามารถเชื่อมต่อซิงค์ Cloud ได้ในขณะนี้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต");
         }
     } finally {
-        if (manualAlert) hideGlobalLoading();
+        if (manualAlert && !syncSuccess) hideGlobalLoading();
     }
 }
 
@@ -1056,6 +1134,7 @@ function initFormHandlers() {
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         showGlobalLoading("กำลังบันทึกข้อมูล...", "ระบบกำลังบันทึกประวัติการเข้าซ่อมบำรุงและอัปเดตระบบ...");
+        animateGlobalProgress(80, 2000);
 
         const customerName = document.getElementById("customer-name").value;
         
@@ -1233,6 +1312,8 @@ function initFormHandlers() {
         saveReportsToLocalStorage();
         try {
             await syncReportToCloud(newReport);
+            updateGlobalProgress(100);
+            await new Promise(resolve => setTimeout(resolve, 400));
         } catch (err) {
             console.error("Cloud sync failed during save:", err);
         } finally {
@@ -3335,6 +3416,8 @@ function proceedWithUpload(report, webhookUrl, scaleVal, qualityVal, windowWidth
     if (statusTitle) statusTitle.innerText = "กำลังประมวลผล PDF...";
     if (statusMsg) statusMsg.innerText = "ระบบกำลังจัดระเบียบหน้าและแปลงโครงสร้างกระดาษรายงาน...";
     if (actionContainer) actionContainer.style.display = "none";
+    updateDriveProgress(0);
+    animateDriveProgress(45, 2000);
 
     // Setup html2pdf options
     const element = document.getElementById("report-printable-area");
@@ -3393,6 +3476,7 @@ function proceedWithUpload(report, webhookUrl, scaleVal, qualityVal, windowWidth
             
             if (statusTitle) statusTitle.innerText = "กำลังอัปโหลดขึ้น Google Drive...";
             if (statusMsg) statusMsg.innerText = "ระบบกำลังบันทึกประวัติการตรวจเช็คลงใน Google Sheets และอัปโหลดไฟล์รายงาน...";
+            animateDriveProgress(90, 3000);
     
             // Translate type for Google Sheet logging
             let sType = report.maintenanceType || "-";
@@ -3509,6 +3593,8 @@ function proceedWithManualUpload(report, webhookUrl, base64Pdf) {
     if (statusTitle) statusTitle.innerText = "กำลังอัปโหลดไฟล์...";
     if (statusMsg) statusMsg.innerText = "กำลังนำส่งไฟล์ PDF ที่เลือกขึ้นสู่ Google Drive...";
     if (actionContainer) actionContainer.style.display = "none";
+    updateDriveProgress(0);
+    animateDriveProgress(90, 3000);
 
     // Clear file input for next time
     const fileInput = document.getElementById("manual-pdf-upload");
@@ -3549,6 +3635,7 @@ function proceedWithManualUpload(report, webhookUrl, base64Pdf) {
     .then(handleFetchResponse)
     .then(res => {
         if (res.status === "success") {
+            updateDriveProgress(100);
             if (loadingIcon) loadingIcon.style.display = "none";
             if (successIcon) successIcon.style.display = "block";
             if (statusTitle) statusTitle.innerText = "อัปโหลดสำเร็จ!";

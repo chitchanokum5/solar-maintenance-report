@@ -1097,8 +1097,13 @@
     <!-- Google Drive Sync Loading Modal -->
     <div id="drive-sync-modal" class="modal-overlay no-print" style="display: none; z-index: 10000;">
         <div class="modal-card" style="max-width: 340px; text-align: center; padding: 2rem;">
-            <div id="drive-sync-loading-icon" style="margin-bottom: 1.25rem;">
-                <i data-lucide="loader-2" class="spin" style="width: 48px; height: 48px; color: var(--primary-solar); margin: 0 auto;"></i>
+            <!-- Progress Bar Section -->
+            <div id="drive-sync-loading-icon" style="margin-bottom: 1.25rem; width: 100%;">
+                <!-- Progress Bar Container -->
+                <div style="background-color: rgba(255,255,255,0.08); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; margin-bottom: 8px; border: 1px solid var(--border-color);">
+                    <div id="drive-sync-progress-bar" style="background: linear-gradient(90deg, var(--primary-solar) 0%, #10b981 100%); width: 0%; height: 100%; transition: width 0.3s ease;"></div>
+                </div>
+                <div id="drive-sync-percentage" style="font-size: 0.85rem; font-weight: 700; color: var(--primary-solar);">0%</div>
             </div>
             <div id="drive-sync-success-icon" style="margin-bottom: 1.25rem; display: none;">
                 <i data-lucide="check-circle-2" style="width: 48px; height: 48px; color: #10b981; margin: 0 auto;"></i>
@@ -1124,10 +1129,14 @@
     <!-- Global Loading Overlay -->
     <div id="global-loading-overlay" class="modal-overlay no-print" style="display: none; z-index: 20000; flex-direction: column; gap: 15px;">
         <div class="modal-card" style="max-width: 340px; text-align: center; padding: 2rem;">
-            <div style="margin-bottom: 1.25rem;">
-                <i data-lucide="loader-2" class="spin" style="width: 48px; height: 48px; color: var(--primary-solar); margin: 0 auto;"></i>
+            <h4 id="global-loading-title" style="margin: 0 0 12px 0; font-size: 1.05rem; color: var(--text-primary);">กำลังดำเนินการ...</h4>
+            
+            <!-- Progress Bar Section -->
+            <div style="background-color: rgba(255,255,255,0.08); border-radius: 10px; height: 10px; width: 100%; overflow: hidden; margin-bottom: 8px; border: 1px solid var(--border-color);">
+                <div id="global-loading-progress-bar" style="background: linear-gradient(90deg, var(--primary-solar) 0%, #10b981 100%); width: 0%; height: 100%; transition: width 0.3s ease;"></div>
             </div>
-            <h4 id="global-loading-title" style="margin: 0 0 8px 0; font-size: 1.05rem; color: var(--text-primary);">กำลังดำเนินการ...</h4>
+            <div id="global-loading-percentage" style="font-size: 0.85rem; font-weight: 700; color: var(--primary-solar); margin-bottom: 12px;">0%</div>
+            
             <p id="global-loading-message" style="margin: 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">โปรดรอสักครู่ ระบบกำลังดำเนินรายการ</p>
         </div>
     </div>
