@@ -2230,3 +2230,13 @@ body[data-layout="floating-hero"] #tab-dashboard .kpi-grid {
 .rendering-pdf * {
     font-family: 'Tahoma', 'Thonburi', 'Noto Sans Thai', sans-serif !important;
 }
+
+/* Animated Spin Utility Class */
+.spin {
+    animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

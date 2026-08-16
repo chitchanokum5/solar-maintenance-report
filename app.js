@@ -33,8 +33,30 @@ function getCloudEndpoint() {
 }
 let isCloudSyncing = false;
 
+// Global Loading Overlay helpers
+function showGlobalLoading(title = "กำลังดำเนินการ...", message = "โปรดรอสักครู่ ระบบกำลังดำเนินรายการ") {
+    const overlay = document.getElementById("global-loading-overlay");
+    const titleEl = document.getElementById("global-loading-title");
+    const msgEl = document.getElementById("global-loading-message");
+    if (overlay) {
+        if (titleEl) titleEl.innerText = title;
+        if (msgEl) msgEl.innerText = message;
+        overlay.style.display = "flex";
+    }
+}
+
+function hideGlobalLoading() {
+    const overlay = document.getElementById("global-loading-overlay");
+    if (overlay) {
+        overlay.style.display = "none";
+    }
+}
+
 async function fetchSharedCloudReports(manualAlert = false) {
     if (isCloudSyncing) return;
+    if (manualAlert) {
+        showGlobalLoading("กำลังซิงค์ข้อมูล...", "ระบบกำลังดึงข้อมูลรายงานล่าสุดจาก Google Drive...");
+    }
     try {
         const endpoint = getCloudEndpoint();
         const res = await fetch(endpoint + "?action=getReports&nocache=" + Date.now());
@@ -102,6 +124,8 @@ async function fetchSharedCloudReports(manualAlert = false) {
         if (manualAlert) {
             alert("ไม่สามารถเชื่อมต่อซิงค์ Cloud ได้ในขณะนี้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต");
         }
+    } finally {
+        if (manualAlert) hideGlobalLoading();
     }
 }
 
@@ -1029,8 +1053,9 @@ function initFormHandlers() {
     });
 
     const form = document.getElementById("report-form");
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
         e.preventDefault();
+        showGlobalLoading("กำลังบันทึกข้อมูล...", "ระบบกำลังบันทึกประวัติการเข้าซ่อมบำรุงและอัปเดตระบบ...");
 
         const customerName = document.getElementById("customer-name").value;
         
@@ -1206,7 +1231,13 @@ function initFormHandlers() {
         }
 
         saveReportsToLocalStorage();
-        syncReportToCloud(newReport);
+        try {
+            await syncReportToCloud(newReport);
+        } catch (err) {
+            console.error("Cloud sync failed during save:", err);
+        } finally {
+            hideGlobalLoading();
+        }
 
         form.reset();
         resetTechnicianFormState();

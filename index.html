@@ -1121,6 +1121,17 @@
         </div>
     </div>
 
+    <!-- Global Loading Overlay -->
+    <div id="global-loading-overlay" class="modal-overlay no-print" style="display: none; z-index: 20000; flex-direction: column; gap: 15px;">
+        <div class="modal-card" style="max-width: 340px; text-align: center; padding: 2rem;">
+            <div style="margin-bottom: 1.25rem;">
+                <i data-lucide="loader-2" class="spin" style="width: 48px; height: 48px; color: var(--primary-solar); margin: 0 auto;"></i>
+            </div>
+            <h4 id="global-loading-title" style="margin: 0 0 8px 0; font-size: 1.05rem; color: var(--text-primary);">กำลังดำเนินการ...</h4>
+            <p id="global-loading-message" style="margin: 0; font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">โปรดรอสักครู่ ระบบกำลังดำเนินรายการ</p>
+        </div>
+    </div>
+
     <!-- Add Team Member Modal -->
     <div id="add-member-modal" class="modal-overlay no-print" style="display: none; z-index: 9999;">
         <div class="modal-card" style="max-width: 400px; width: 90%;">
