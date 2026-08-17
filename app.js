@@ -33,6 +33,15 @@ function getCloudEndpoint() {
 }
 let isCloudSyncing = false;
 
+// Auto-migrate old webhook URL to new one in LocalStorage
+(function() {
+    const currentWebhook = localStorage.getItem("google_drive_webhook_url");
+    if (currentWebhook && currentWebhook.includes("AKfycbyyPO7JYaPoit4tNtCwP9sYaSBbilcjda0fHeoUEbat4B1zEMX3UBK9uWVPoyREoY2X5Q")) {
+        localStorage.setItem("google_drive_webhook_url", "https://script.google.com/macros/s/AKfycbzcjeDu6dosLenQf-GaSQIIuCHH2XPsKVmQAESto7URh19Bc376OU2gDiFWNyG2U_YI/exec");
+        console.log("Auto-migrated Google Apps Script URL to the new deployment.");
+    }
+})();
+
 // Global Loading Overlay & Progress Bar helpers
 let globalProgressInterval = null;
 let driveProgressInterval = null;
