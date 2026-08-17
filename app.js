@@ -1676,9 +1676,13 @@ function viewReportDetail(id) {
     const printInvSec = document.getElementById("print-inverter-parameters-section");
     const printGeneralPhotosSec = document.getElementById("print-photos-section");
     const manualBreak = document.getElementById("print-page-break-before-summary");
+    const pmChecklistBreak = document.getElementById("print-page-break-before-pm-checklist");
 
     if (manualBreak) {
         manualBreak.style.display = "";
+    }
+    if (pmChecklistBreak) {
+        pmChecklistBreak.style.display = isCmReport ? "none" : "";
     }
 
     if (isCmReport) {
