@@ -413,41 +413,50 @@ const mockReports = [
     }
 ];
 
-// LocalStorage Auto-healing & Quota Management Save Helper
+// LocalStorage Auto-healing & Quota Management Save Helper (Clones data to avoid stripping images from main reports memory and cloud database)
 function saveReportsToLocalStorage() {
+    // Create a deep clone of the reports array to manipulate only for localStorage
+    let clonedReports = [];
     try {
-        localStorage.setItem("solar_reports", JSON.stringify(reports));
+        clonedReports = JSON.parse(JSON.stringify(reports));
+    } catch (cloneErr) {
+        console.error("Cloning reports failed:", cloneErr);
+        clonedReports = reports; // Fallback
+    }
+
+    try {
+        localStorage.setItem("solar_reports", JSON.stringify(clonedReports));
         console.log("Saved reports to localStorage successfully. Count:", reports.length);
     } catch (e) {
         if (e.name === "QuotaExceededError" || e.code === 22) {
-            console.warn("LocalStorage quota exceeded! Automatically cleaning up images from older reports to free up space...");
+            console.warn("LocalStorage quota exceeded! Automatically cleaning up images from older reports to free up space in localStorage...");
             
-            // Keep images only for the first 2 reports in the array (newest first)
-            for (let i = 0; i < reports.length; i++) {
+            // Keep images only for the first 2 reports in the cloned array for local storage
+            for (let i = 0; i < clonedReports.length; i++) {
                 if (i >= 2) {
-                    reports[i].cmImagesBefore = [];
-                    reports[i].cmImagesAfter = [];
-                    reports[i].imagesInverterRoom = [];
-                    reports[i].imagesRooftop = [];
+                    clonedReports[i].cmImagesBefore = [];
+                    clonedReports[i].cmImagesAfter = [];
+                    clonedReports[i].imagesInverterRoom = [];
+                    clonedReports[i].imagesRooftop = [];
                 }
             }
             
             try {
-                localStorage.setItem("solar_reports", JSON.stringify(reports));
+                localStorage.setItem("solar_reports", JSON.stringify(clonedReports));
                 console.log("Successfully saved cleaned reports to LocalStorage.");
             } catch (err) {
-                console.error("LocalStorage still full after clean. Stripping all report images.", err);
+                console.error("LocalStorage still full after clean. Stripping all report images from LocalStorage copy.", err);
                 
-                // Strip all images from reports
-                for (let i = 0; i < reports.length; i++) {
-                    reports[i].cmImagesBefore = [];
-                    reports[i].cmImagesAfter = [];
-                    reports[i].imagesInverterRoom = [];
-                    reports[i].imagesRooftop = [];
+                // Strip all images from cloned reports
+                for (let i = 0; i < clonedReports.length; i++) {
+                    clonedReports[i].cmImagesBefore = [];
+                    clonedReports[i].cmImagesAfter = [];
+                    clonedReports[i].imagesInverterRoom = [];
+                    clonedReports[i].imagesRooftop = [];
                 }
                 
                 try {
-                    localStorage.setItem("solar_reports", JSON.stringify(reports));
+                    localStorage.setItem("solar_reports", JSON.stringify(clonedReports));
                 } catch (finalErr) {
                     console.error("Critical: LocalStorage is completely full and cannot save anything.", finalErr);
                     alert("พื้นที่จัดเก็บข้อมูลบนเครื่องนี้เต็ม! ไม่สามารถบันทึกข้อมูลได้ กรุณาลบข้อมูลประวัติของบราวเซอร์เพื่อเคลียร์พื้นที่");
