@@ -1473,7 +1473,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
     @page {
         size: A4 portrait;
-        margin: 0mm 10mm 10mm 10mm !important;
+        margin: 15mm 10mm 15mm 10mm !important;
     }
 
     .no-print, 

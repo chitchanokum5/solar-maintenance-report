@@ -3455,7 +3455,7 @@ function proceedWithUpload(report, webhookUrl, scaleVal, qualityVal, windowWidth
     }
 
     const opt = {
-        margin:       0, 
+        margin:       [15, 10, 15, 10], 
         filename:     `${report.id}_${report.customerName}.pdf`,
         image:        { type: 'jpeg', quality: qualityVal },
         html2canvas:  html2canvasOpts,
