@@ -2196,11 +2196,10 @@ body[data-layout="floating-hero"] #tab-dashboard .kpi-grid {
     break-inside: auto !important;
 }
 
-/* Avoid page breaks inside checklist category wrappers */
-.rendering-pdf .print-checklist-category-wrapper {
+/* Avoid page breaks inside individual checklist tables */
+.rendering-pdf .checklist-print-table {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    display: block !important;
 }
 
 /* Avoid orphaned category subheaders and section headings inside PDF rendering */

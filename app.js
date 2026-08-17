@@ -1757,18 +1757,7 @@ function viewReportDetail(id) {
             });
 
             for (const [sectionName, items] of Object.entries(printSections)) {
-                // Create category wrapper to prevent page breaks inside individual categories
-                const wrapperDiv = document.createElement("div");
-                wrapperDiv.className = "print-checklist-category-wrapper";
-                container.appendChild(wrapperDiv);
-
-                // 1. Create category header block
-                const headerDiv = document.createElement("div");
-                headerDiv.className = "checklist-section-title";
-                headerDiv.innerText = sectionName;
-                wrapperDiv.appendChild(headerDiv);
-
-                // 2. Create category table
+                // Create category table
                 const table = document.createElement("table");
                 table.className = "checklist-print-table";
                 table.style.marginBottom = "20px";
@@ -1776,6 +1765,11 @@ function viewReportDetail(id) {
                 
                 table.innerHTML = `
                     <thead>
+                        <tr>
+                            <th colspan="3" style="background-color:#f1f5f9; font-weight:700; color:#0f172a; padding:8px 12px; border:1px solid #cbd5e1; font-size:0.82rem; text-align:left;">
+                                ${sectionName}
+                            </th>
+                        </tr>
                         <tr>
                             <th style="padding:6px 12px; font-size:0.8rem; border:1px solid #cbd5e1; text-align:left; background-color:#f8fafc; color:#475569; width:40%;">หัวข้อที่ทำการตรวจสอบ</th>
                             <th style="padding:6px 12px; font-size:0.8rem; border:1px solid #cbd5e1; text-align:center; background-color:#f8fafc; color:#475569; width:15%;">สถานะการประเมิน</th>
@@ -1786,7 +1780,7 @@ function viewReportDetail(id) {
                 `;
                 
                 const tbody = table.querySelector("tbody");
-                wrapperDiv.appendChild(table);
+                container.appendChild(table);
 
                 const allNa = items.every(item => (report.checks?.[item.key] || "Pass") === "N/A");
 
