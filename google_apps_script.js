@@ -220,6 +220,50 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
     
+    // Check if it is deleting a report
+    if (data && data.action === "deleteReport") {
+      var deleteId = data.id;
+      
+      // 1. Delete from reports_db.json
+      var reportsList = [];
+      var mainFolder = DriveApp.getFolderById(FOLDER_ID);
+      var filesJson = mainFolder.getFilesByName("reports_db.json");
+      if (filesJson.hasNext()) {
+        var jsonFile = filesJson.next();
+        try {
+          reportsList = JSON.parse(jsonFile.getAs("application/json").getDataAsString());
+        } catch (jsonErr) {
+          reportsList = [];
+        }
+        reportsList = reportsList.filter(function(r) { return r && r.id !== deleteId; });
+        jsonFile.setContent(JSON.stringify(reportsList));
+      }
+      
+      // 2. Delete the row from the Google Sheet
+      var sheetName = "KKE Solar Maintenance Logs";
+      var filesSheet = mainFolder.getFilesByName(sheetName);
+      if (filesSheet.hasNext()) {
+        var fileSpreadsheet = filesSheet.next();
+        var spreadsheet = SpreadsheetApp.openById(fileSpreadsheet.getId());
+        var sheet = spreadsheet.getSheets()[0];
+        var lastRow = sheet.getLastRow();
+        if (lastRow > 1) {
+          var values = sheet.getRange(2, 2, lastRow - 1, 1).getValues(); // Read Job Number column (Column B)
+          for (var i = values.length - 1; i >= 0; i--) {
+            var rowJobNumber = values[i][0] || "";
+            if (rowJobNumber.toString().trim() === deleteId.toString().trim()) {
+              sheet.deleteRow(i + 2); // Row index is 1-based, offset by 2
+            }
+          }
+        }
+      }
+      
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        message: "Report deleted from database and sheet successfully!"
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
     var fileName = data.fileName || "Solar_Report.pdf";
     var pdfData = data.pdfData; // Base64 PDF string
     var metadata = data.metadata || {};

@@ -207,7 +207,7 @@ async function fetchSharedCloudReports(manualAlert = false) {
     }
 }
 
-async function saveSharedCloudReports() {
+async function saveSharedCloudReports(excludeId = null) {
     isCloudSyncing = true;
     try {
         const endpoint = getCloudEndpoint();
@@ -217,6 +217,12 @@ async function saveSharedCloudReports() {
         if (res.ok) {
             const remoteData = await res.json();
             if (Array.isArray(remoteData)) currentCloudReports = remoteData;
+        }
+
+        // If a report is being deleted, remove it from both currentCloudReports and reports lists
+        if (excludeId) {
+            currentCloudReports = currentCloudReports.filter(r => r && r.id !== excludeId);
+            reports = reports.filter(r => r && r.id !== excludeId);
         }
 
         const mergedMap = new Map();
@@ -243,7 +249,24 @@ async function syncReportToCloud(report) {
 }
 
 async function deleteReportFromCloud(id) {
-    await saveSharedCloudReports();
+    isCloudSyncing = true;
+    try {
+        const endpoint = getCloudEndpoint();
+        // Send a dedicated delete request to Apps Script to delete it from both JSON and Sheets row
+        await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify({ action: "deleteReport", id: id })
+        });
+        // Update the local list as well
+        reports = reports.filter(r => r && r.id !== id);
+        saveReportsToLocalStorage();
+        console.log("Report deleted successfully from cloud.");
+    } catch (e) {
+        console.error("Cloud delete request failed:", e);
+    } finally {
+        isCloudSyncing = false;
+    }
 }
 
 // Complete 63-item inspection list from KKE checklist PDF
