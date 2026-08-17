@@ -1753,11 +1753,16 @@ function viewReportDetail(id) {
             });
 
             for (const [sectionName, items] of Object.entries(printSections)) {
+                // Create category wrapper to prevent page breaks inside individual categories
+                const wrapperDiv = document.createElement("div");
+                wrapperDiv.className = "print-checklist-category-wrapper";
+                container.appendChild(wrapperDiv);
+
                 // 1. Create category header block
                 const headerDiv = document.createElement("div");
                 headerDiv.className = "checklist-section-title";
                 headerDiv.innerText = sectionName;
-                container.appendChild(headerDiv);
+                wrapperDiv.appendChild(headerDiv);
 
                 // 2. Create category table
                 const table = document.createElement("table");
@@ -1777,7 +1782,7 @@ function viewReportDetail(id) {
                 `;
                 
                 const tbody = table.querySelector("tbody");
-                container.appendChild(table);
+                wrapperDiv.appendChild(table);
 
                 const allNa = items.every(item => (report.checks?.[item.key] || "Pass") === "N/A");
 

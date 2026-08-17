@@ -2188,6 +2188,21 @@ body[data-layout="floating-hero"] #tab-dashboard .kpi-grid {
     break-inside: avoid !important;
 }
 
+/* Allow page breaks inside these large sections to prevent layout breaking */
+.rendering-pdf #print-pm-checklist-section,
+.rendering-pdf #print-photos-section,
+.rendering-pdf #print-cm-repair-section {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+}
+
+/* Avoid page breaks inside checklist category wrappers */
+.rendering-pdf .print-checklist-category-wrapper {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    display: block !important;
+}
+
 /* Avoid orphaned category subheaders and section headings inside PDF rendering */
 .rendering-pdf .checklist-category-row,
 .rendering-pdf .checklist-section-title,
