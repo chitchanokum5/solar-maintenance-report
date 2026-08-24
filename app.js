@@ -1351,15 +1351,7 @@ function initFormHandlers() {
         }
 
         saveReportsToLocalStorage();
-        try {
-            await syncReportToCloud(newReport);
-            updateGlobalProgress(100);
-            await new Promise(resolve => setTimeout(resolve, 400));
-        } catch (err) {
-            console.error("Cloud sync failed during save:", err);
-        } finally {
-            hideGlobalLoading();
-        }
+        hideGlobalLoading();
 
         form.reset();
         resetTechnicianFormState();
@@ -1384,7 +1376,7 @@ function initFormHandlers() {
 
         if (modal) {
             if (modalTitle) modalTitle.innerText = "บันทึกข้อมูลเรียบร้อยแล้ว!";
-            if (modalMsg) modalMsg.innerText = `ใบรายงานซ่อมบำรุงรหัส ${reportId} ถูกบันทึกและซิงค์ข้อมูลเรียบร้อยแล้ว`;
+            if (modalMsg) modalMsg.innerText = `ใบรายงานซ่อมบำรุงรหัส ${reportId} บันทึกสำเร็จ (กำลังเริ่มอัปโหลดขึ้น Google Drive เบื้องหลัง)`;
             modal.style.display = "flex";
             if (window.lucide) lucide.createIcons();
 
@@ -1396,6 +1388,28 @@ function initFormHandlers() {
             alert(`บันทึกข้อมูลรายงานรหัส ${reportId} เรียบร้อยแล้ว!`);
             viewReportDetail(reportId);
         }
+
+        // Trigger Google Drive sync asynchronously in the background so the user does not wait
+        console.log("Initiating background sync to Google Drive...");
+        const syncCloudBtn = document.getElementById("btn-manual-sync-cloud");
+        if (syncCloudBtn) {
+            syncCloudBtn.disabled = true;
+            syncCloudBtn.querySelector("span").innerText = "กำลังซิงค์เบื้องหลัง...";
+        }
+
+        syncReportToCloud(newReport)
+            .then(() => {
+                console.log("Background cloud sync completed successfully.");
+            })
+            .catch(err => {
+                console.error("Background cloud sync failed:", err);
+            })
+            .finally(() => {
+                if (syncCloudBtn) {
+                    syncCloudBtn.disabled = false;
+                    syncCloudBtn.querySelector("span").innerText = "ซิงค์รายงาน";
+                }
+            });
     });
 
     document.getElementById("btn-cancel-report").addEventListener("click", () => {
