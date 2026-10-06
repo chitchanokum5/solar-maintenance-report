@@ -375,11 +375,20 @@ const mockReports = [
         inverters: [{
             name: "Inverter 1",
             model: "Huawei SUN2000-100KTL-M1",
-            pvVoltage: 580,
-            pvCurrent: 11.2,
+            pvVoltage: 580.5,
+            pvCurrent: 10.8,
             acPower: 92.5,
             inverterTemp: 52,
-            ajbTemp: 46
+            ajbTemp: 46,
+            strings: [
+                { stringNo: 1, vdc: 582, idc: 10.8 }, { stringNo: 2, vdc: 580, idc: 10.7 },
+                { stringNo: 3, vdc: 581, idc: 10.9 }, { stringNo: 4, vdc: 579, idc: 10.8 },
+                { stringNo: 5, vdc: 583, idc: 10.8 }, { stringNo: 6, vdc: 578, idc: 10.6 },
+                { stringNo: 7, vdc: 580, idc: 10.9 }, { stringNo: 8, vdc: 581, idc: 10.8 },
+                { stringNo: 9, vdc: 582, idc: 10.7 }, { stringNo: 10, vdc: 579, idc: 10.8 },
+                { stringNo: 11, vdc: 580, idc: 10.9 }, { stringNo: 12, vdc: 583, idc: 10.7 },
+                { stringNo: 13, vdc: 581, idc: 10.8 }, { stringNo: 14, vdc: 579, idc: 10.8 }
+            ]
         }],
         acPower: 92.5,
         checks: {},
@@ -1171,6 +1180,31 @@ function initFormHandlers() {
         addInverterInput();
     });
 
+    const maintTypeSelect = document.getElementById("maintenance-type");
+    if (maintTypeSelect) {
+        const handleTypeToggle = () => {
+            const isCm = maintTypeSelect.value === "Corrective Maintenance";
+            const pmWrapper = document.getElementById("pm-checklist-section-wrapper");
+            const cmWrapper = document.getElementById("cm-repair-section-wrapper");
+            const invWrapper = document.getElementById("inverter-parameters-section-wrapper");
+            const photoWrapper = document.getElementById("general-photos-section-wrapper");
+
+            if (isCm) {
+                if (pmWrapper) pmWrapper.style.display = "none";
+                if (cmWrapper) cmWrapper.style.display = "block";
+                if (invWrapper) invWrapper.style.display = "none";
+                if (photoWrapper) photoWrapper.style.display = "none";
+            } else {
+                if (pmWrapper) pmWrapper.style.display = "block";
+                if (cmWrapper) cmWrapper.style.display = "none";
+                if (invWrapper) invWrapper.style.display = "block";
+                if (photoWrapper) photoWrapper.style.display = "block";
+            }
+        };
+
+        maintTypeSelect.addEventListener("change", handleTypeToggle);
+    }
+
     const form = document.getElementById("report-form");
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -1238,11 +1272,44 @@ function initFormHandlers() {
             const name = card.querySelector(".inv-name")?.value.trim() || "";
             const model = card.querySelector(".inv-model")?.value.trim() || "";
             const acPowerRaw = card.querySelector(".inv-ac-power")?.value.trim() || "";
-            const pvVoltage = card.querySelector(".inv-pv-voltage")?.value.trim() || "";
-            const pvCurrent = card.querySelector(".inv-pv-current")?.value.trim() || "";
             const inverterTemp = card.querySelector(".inv-temp")?.value.trim() || "";
             const ajbTemp = card.querySelector(".inv-ajb-temp")?.value.trim() || "";
             
+            const strings = [];
+            let sumVdc = 0;
+            let sumIdc = 0;
+            let countVdc = 0;
+            let countIdc = 0;
+
+            for (let i = 1; i <= 14; i++) {
+                const vdcEl = card.querySelector(`.inv-string-vdc[data-string="${i}"]`);
+                const idcEl = card.querySelector(`.inv-string-idc[data-string="${i}"]`);
+                
+                const vdcRaw = vdcEl ? vdcEl.value.trim() : "";
+                const idcRaw = idcEl ? idcEl.value.trim() : "";
+
+                const vdcNum = vdcRaw !== "" ? parseFloat(vdcRaw) : null;
+                const idcNum = idcRaw !== "" ? parseFloat(idcRaw) : null;
+
+                strings.push({
+                    stringNo: i,
+                    vdc: vdcRaw,
+                    idc: idcRaw
+                });
+
+                if (vdcNum !== null && !isNaN(vdcNum)) {
+                    sumVdc += vdcNum;
+                    countVdc++;
+                }
+                if (idcNum !== null && !isNaN(idcNum)) {
+                    sumIdc += idcNum;
+                    countIdc++;
+                }
+            }
+
+            const avgVdc = countVdc > 0 ? (sumVdc / countVdc).toFixed(1) : "";
+            const avgIdc = countIdc > 0 ? (sumIdc / countIdc).toFixed(1) : "";
+
             const acPowerNum = parseFloat(acPowerRaw) || 0;
             totalAcPower += acPowerNum;
 
@@ -1250,10 +1317,11 @@ function initFormHandlers() {
                 name,
                 model,
                 acPower: acPowerRaw,
-                pvVoltage,
-                pvCurrent,
+                pvVoltage: avgVdc,
+                pvCurrent: avgIdc,
                 inverterTemp,
-                ajbTemp
+                ajbTemp,
+                strings
             });
         });
 
@@ -1364,6 +1432,10 @@ function initFormHandlers() {
         document.getElementById("image-preview-container-rooftop").innerHTML = "";
         document.getElementById("cm-preview-before").innerHTML = "";
         document.getElementById("cm-preview-after").innerHTML = "";
+        
+        const defectContainer = document.getElementById("defect-items-container");
+        if (defectContainer) defectContainer.innerHTML = "";
+        defectCardCounter = 0;
         
         document.getElementById("inverters-form-container").innerHTML = "";
         addInverterInput("Inverter 1");
@@ -1667,22 +1739,35 @@ function viewReportDetail(id) {
     window.switchTab("report-view");
     window.scrollTo(0, 0);
 
-    document.getElementById("print-report-id").innerText = report.id;
+    const elId = document.getElementById("print-report-id");
+    if (elId) elId.innerText = report.id || "";
     
     const dateFormatted = formatDateThaiFull(report.maintenanceDate);
-    document.getElementById("print-created-date").innerText = dateFormatted;
-    document.getElementById("print-date").innerText = dateFormatted;
+    const elCreatedDate = document.getElementById("print-created-date");
+    if (elCreatedDate) elCreatedDate.innerText = dateFormatted;
 
-    document.getElementById("print-customer-name").innerText = report.customerName;
-    document.getElementById("print-location").innerText = report.location;
-    document.getElementById("print-type").innerText = translateMaintenanceType(report.maintenanceType);
+    const elDate = document.getElementById("print-date");
+    if (elDate) elDate.innerText = dateFormatted;
+
+    const elCust = document.getElementById("print-customer-name");
+    if (elCust) elCust.innerText = report.customerName || "-";
+
+    const elLoc = document.getElementById("print-location");
+    if (elLoc) elLoc.innerText = report.location || "-";
+
+    const elType = document.getElementById("print-type");
+    if (elType) elType.innerText = translateMaintenanceType(report.maintenanceType);
+
     const systemSizeNum = parseFloat(report.systemSize);
-    document.getElementById("print-system-size").innerText = !isNaN(systemSizeNum) ? systemSizeNum.toFixed(1) : "-";
-    document.getElementById("print-technician").innerText = report.technicianName;
+    const elSize = document.getElementById("print-system-size");
+    if (elSize) elSize.innerText = !isNaN(systemSizeNum) ? systemSizeNum.toFixed(1) : "-";
+
+    const elTech = document.getElementById("print-technician");
+    if (elTech) elTech.innerText = report.technicianName || "-";
 
     // Render Inverters Table
     const invertersBody = document.getElementById("print-inverters-body");
-    invertersBody.innerHTML = "";
+    if (invertersBody) invertersBody.innerHTML = "";
     
     function formatUnitDisplay(val, defaultUnit) {
         if (val === undefined || val === null || String(val).trim() === "" || String(val).trim() === "-") {
@@ -1695,33 +1780,145 @@ function viewReportDetail(id) {
         return str;
     }
 
-    if (report.inverters && report.inverters.length > 0) {
-        report.inverters.forEach(inv => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td style="font-weight:600;">
-                    ${inv.name}
-                    ${inv.model ? `<div style="font-size:0.7rem; color:#64748b; font-weight:normal; margin-top:2px;">รุ่น: ${inv.model}</div>` : ""}
-                </td>
-                <td>${formatUnitDisplay(inv.pvVoltage, "")}</td>
-                <td>${formatUnitDisplay(inv.pvCurrent, "")}</td>
-                <td>${formatUnitDisplay(inv.acPower, "kW")}</td>
-                <td>${formatUnitDisplay(inv.inverterTemp, "")}</td>
-                <td>${formatUnitDisplay(inv.ajbTemp, "")}</td>
-            `;
-            invertersBody.appendChild(tr);
+    // Helper to build printable matrix table (Omit strings with no values entered)
+    function buildStringsPrintMatrixHtml(stringsData = []) {
+        if (!Array.isArray(stringsData) || stringsData.length === 0) {
+            return "";
+        }
+
+        const activeStrings = [];
+        for (let i = 1; i <= 14; i++) {
+            let sData = stringsData.find(s => s && (s.stringNo === i || s.stringNo === String(i))) || stringsData[i - 1];
+            let vdc = sData && sData.vdc !== undefined && sData.vdc !== null ? String(sData.vdc).trim() : "";
+            let idc = sData && sData.idc !== undefined && sData.idc !== null ? String(sData.idc).trim() : "";
+
+            if ((vdc !== "" && vdc !== "-") || (idc !== "" && idc !== "-")) {
+                activeStrings.push({
+                    stringNo: i,
+                    vdc: vdc !== "" ? vdc : "-",
+                    idc: idc !== "" ? idc : "-"
+                });
+            }
+        }
+
+        if (activeStrings.length === 0) {
+            return "";
+        }
+
+        let ths = "";
+        let vdcTds = "";
+        let idcTds = "";
+
+        activeStrings.forEach(s => {
+            ths += `<th style="padding: 3px 5px; font-size: 0.68rem; text-align: center;">S${s.stringNo}</th>`;
+            vdcTds += `<td style="padding: 3px 5px; font-size: 0.68rem; text-align: center;">${s.vdc}</td>`;
+            idcTds += `<td style="padding: 3px 5px; font-size: 0.68rem; text-align: center;">${s.idc}</td>`;
         });
-    } else {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td style="font-weight:600;">Inverter 1</td>
-            <td>-</td>
-            <td>-</td>
-            <td>${formatUnitDisplay(report.acPower, "kW")}</td>
-            <td>-</td>
-            <td>-</td>
+
+        return `
+            <div style="margin-top: 4px; padding-top: 4px;">
+                <div style="font-size: 0.7rem; font-weight: 600; color: #475569; margin-bottom: 3px;">⚡ ค่าตรวจวัด DC Strings (${activeStrings.length} สตริงที่ใช้งาน):</div>
+                <table class="print-strings-matrix-table" style="width:100%; border-collapse:collapse; font-size:0.68rem;">
+                    <thead>
+                        <tr style="background:#f8fafc;">
+                            <th style="padding: 3px 6px; font-weight: 700; width: 60px; text-align: left;">รายการ</th>
+                            ${ths}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-weight:600; background:#f8fafc; padding:3px 6px; text-align: left;">Vdc (V)</td>
+                            ${vdcTds}
+                        </tr>
+                        <tr>
+                            <td style="font-weight:600; background:#f8fafc; padding:3px 6px; text-align: left;">Idc (A)</td>
+                            ${idcTds}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         `;
-        invertersBody.appendChild(tr);
+    }
+
+    // Render Inverters Blocks (Grouped per inverter with individual table headers and page-break protection)
+    const invertersContainer = document.getElementById("print-inverters-container") || document.getElementById("print-inverters-body");
+    if (invertersContainer) {
+        invertersContainer.innerHTML = "";
+
+        if (report.inverters && report.inverters.length > 0) {
+            report.inverters.forEach(inv => {
+                const stringsHtml = buildStringsPrintMatrixHtml(inv.strings);
+                
+                const invBlock = document.createElement("div");
+                invBlock.className = "print-inverter-block";
+                invBlock.style.cssText = "page-break-inside: avoid !important; break-inside: avoid !important; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; margin-bottom: 12px; background: #ffffff;";
+                
+                invBlock.innerHTML = `
+                    <table class="measurement-print-table" style="width: 100%; border-collapse: collapse; margin: 0;">
+                        <thead>
+                            <tr style="background-color: #f1f5f9;">
+                                <th style="padding: 6px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; width: 18%;">อินเวอร์เตอร์</th>
+                                <th style="padding: 6px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; width: 18%;">แรงดันเฉลี่ย PV (Vdc)</th>
+                                <th style="padding: 6px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; width: 18%;">กระแสเฉลี่ย PV (Idc)</th>
+                                <th style="padding: 6px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; width: 14%;">กำลัง AC (kW)</th>
+                                <th style="padding: 6px 10px; border-bottom: 1px solid #cbd5e1; border-right: 1px solid #cbd5e1; width: 16%;">อุณหภูมิอินเวอร์เตอร์ (°C)</th>
+                                <th style="padding: 6px 10px; border-bottom: 1px solid #cbd5e1; width: 16%;">อุณหภูมิอุปกรณ์ภายในตู้ AJB (°C)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: 600; padding: 6px 10px; border-right: 1px solid #cbd5e1;">
+                                    ${inv.name}
+                                    ${inv.model ? `<div style="font-size: 0.7rem; color: #64748b; font-weight: normal; margin-top: 2px;">รุ่น: ${inv.model}</div>` : ""}
+                                </td>
+                                <td style="padding: 6px 10px; border-right: 1px solid #cbd5e1;">${formatUnitDisplay(inv.pvVoltage, "Vdc")} ${inv.pvVoltage ? '<small style="color:#64748b;">(เฉลี่ย)</small>' : ''}</td>
+                                <td style="padding: 6px 10px; border-right: 1px solid #cbd5e1;">${formatUnitDisplay(inv.pvCurrent, "Idc")} ${inv.pvCurrent ? '<small style="color:#64748b;">(เฉลี่ย)</small>' : ''}</td>
+                                <td style="padding: 6px 10px; border-right: 1px solid #cbd5e1;">${formatUnitDisplay(inv.acPower, "kW")}</td>
+                                <td style="padding: 6px 10px; border-right: 1px solid #cbd5e1;">${formatUnitDisplay(inv.inverterTemp, "")}</td>
+                                <td style="padding: 6px 10px;">${formatUnitDisplay(inv.ajbTemp, "")}</td>
+                            </tr>
+                            ${stringsHtml ? `
+                            <tr>
+                                <td colspan="6" style="padding: 6px 10px; background-color: #ffffff; border-top: 1px solid #cbd5e1;">
+                                    ${stringsHtml}
+                                </td>
+                            </tr>
+                            ` : ''}
+                        </tbody>
+                    </table>
+                `;
+                invertersContainer.appendChild(invBlock);
+            });
+        } else {
+            const invBlock = document.createElement("div");
+            invBlock.className = "print-inverter-block";
+            invBlock.style.cssText = "page-break-inside: avoid !important; break-inside: avoid !important; border: 1px solid #cbd5e1; border-radius: 6px; overflow: hidden; margin-bottom: 12px; background: #ffffff;";
+            invBlock.innerHTML = `
+                <table class="measurement-print-table" style="width: 100%; border-collapse: collapse; margin: 0;">
+                    <thead>
+                        <tr style="background-color: #f1f5f9;">
+                            <th style="padding: 6px 10px;">อินเวอร์เตอร์</th>
+                            <th style="padding: 6px 10px;">แรงดันเฉลี่ย PV (Vdc)</th>
+                            <th style="padding: 6px 10px;">กระแสเฉลี่ย PV (Idc)</th>
+                            <th style="padding: 6px 10px;">กำลัง AC (kW)</th>
+                            <th style="padding: 6px 10px;">อุณหภูมิอินเวอร์เตอร์ (°C)</th>
+                            <th style="padding: 6px 10px;">อุณหภูมิอุปกรณ์ภายในตู้ AJB (°C)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="font-weight: 600; padding: 6px 10px;">Inverter 1</td>
+                            <td style="padding: 6px 10px;">-</td>
+                            <td style="padding: 6px 10px;">-</td>
+                            <td style="padding: 6px 10px;">${formatUnitDisplay(report.acPower, "kW")}</td>
+                            <td style="padding: 6px 10px;">-</td>
+                            <td style="padding: 6px 10px;">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            invertersContainer.appendChild(invBlock);
+        }
     }
 
     // PM vs CM Section Display Toggle in Print Document
@@ -1731,13 +1928,13 @@ function viewReportDetail(id) {
     const printInvSec = document.getElementById("print-inverter-parameters-section");
     const printGeneralPhotosSec = document.getElementById("print-photos-section");
     const manualBreak = document.getElementById("print-page-break-before-summary");
-    const pmChecklistBreak = document.getElementById("print-page-break-before-pm-checklist");
+    const photosBreak = document.getElementById("print-page-break-before-photos");
 
     if (manualBreak) {
-        manualBreak.style.display = "";
+        manualBreak.style.display = "block";
     }
-    if (pmChecklistBreak) {
-        pmChecklistBreak.style.display = isCmReport ? "none" : "";
+    if (photosBreak) {
+        photosBreak.style.display = "block";
     }
 
     if (isCmReport) {
@@ -1800,11 +1997,26 @@ function viewReportDetail(id) {
         if (printInvSec) printInvSec.style.display = "block";
         if (printGeneralPhotosSec) printGeneralPhotosSec.style.display = "block";
 
-        // Render PM Checklist Tables dynamically (one table per category to prevent orphaned subheaders)
+        // Render PM Checklist Tables dynamically (One master header at top of Section 2, category headers per sub-section)
         const container = document.getElementById("pm-checklist-tables-container");
         if (container) {
             container.innerHTML = "";
             
+            // Master Column Header (Rendered ONCE at top of Section 2)
+            const masterHeaderTable = document.createElement("table");
+            masterHeaderTable.className = "checklist-print-table";
+            masterHeaderTable.style.marginBottom = "0px";
+            masterHeaderTable.innerHTML = `
+                <thead>
+                    <tr style="background-color:#f8fafc;">
+                        <th style="padding:6px 12px; font-size:0.8rem; border:1px solid #cbd5e1; text-align:left; color:#475569; width:40%;">หัวข้อที่ทำการตรวจสอบ</th>
+                        <th style="padding:6px 12px; font-size:0.8rem; border:1px solid #cbd5e1; text-align:center; color:#475569; width:15%;">สถานะการประเมิน</th>
+                        <th style="padding:6px 12px; font-size:0.8rem; border:1px solid #cbd5e1; text-align:left; color:#475569; width:45%;">รายละเอียดแนวทางตรวจเช็ค</th>
+                    </tr>
+                </thead>
+            `;
+            container.appendChild(masterHeaderTable);
+
             const printSections = {};
             checklistMetadata.forEach(item => {
                 if (!printSections[item.section]) printSections[item.section] = [];
@@ -1812,26 +2024,20 @@ function viewReportDetail(id) {
             });
 
             for (const [sectionName, items] of Object.entries(printSections)) {
-                // Create category table
+                // Create category table (Flows naturally across page breaks; tight margins)
                 const table = document.createElement("table");
                 table.className = "checklist-print-table";
-                table.style.marginBottom = "20px";
+                table.style.marginBottom = "6px";
                 table.style.marginTop = "0px";
                 
                 table.innerHTML = `
-                    <thead>
-                        <tr>
-                            <th colspan="3" style="background-color:#f1f5f9; font-weight:700; color:#0f172a; padding:8px 12px; border:1px solid #cbd5e1; font-size:0.82rem; text-align:left;">
+                    <tbody>
+                        <tr style="background-color:#f1f5f9; page-break-inside: avoid; break-inside: avoid;">
+                            <td colspan="3" style="font-weight:700; color:#0f172a; padding:6px 12px; border:1px solid #cbd5e1; font-size:0.82rem; text-align:left;">
                                 ${sectionName}
-                            </th>
+                            </td>
                         </tr>
-                        <tr>
-                            <th style="padding:6px 12px; font-size:0.8rem; border:1px solid #cbd5e1; text-align:left; background-color:#f8fafc; color:#475569; width:40%;">หัวข้อที่ทำการตรวจสอบ</th>
-                            <th style="padding:6px 12px; font-size:0.8rem; border:1px solid #cbd5e1; text-align:center; background-color:#f8fafc; color:#475569; width:15%;">สถานะการประเมิน</th>
-                            <th style="padding:6px 12px; font-size:0.8rem; border:1px solid #cbd5e1; text-align:left; background-color:#f8fafc; color:#475569; width:45%;">รายละเอียดแนวทางตรวจเช็ค</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
+                    </tbody>
                 `;
                 
                 const tbody = table.querySelector("tbody");
@@ -1909,6 +2115,7 @@ function viewReportDetail(id) {
             printInvSummary.style.display = "none";
         } else {
             printInvSummary.style.display = "grid";
+            printInvSummary.style.gridTemplateColumns = "1fr";
             printInvSummary.innerHTML = "";
             if (report.inverters && report.inverters.length > 0) {
                 report.inverters.forEach(inv => {
@@ -1923,13 +2130,13 @@ function viewReportDetail(id) {
                             <span>${inv.name} ${inv.model ? `<span style="font-weight: normal; font-size: 0.7rem; color: #64748b;">(${inv.model})</span>` : ""}</span>
                             <span style="font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background-color: var(--primary-solar-glow); color: var(--primary-solar); font-weight: 600;">O&M Checked</span>
                         </h4>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 0.78rem; color: #475569;">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-size: 0.78rem; color: #475569; margin-bottom: 6px;">
                             <div><strong>กำลัง AC:</strong> ${formatUnitDisplay(inv.acPower, "kW")}</div>
-                            <div><strong>แรงดัน PV:</strong> ${formatUnitDisplay(inv.pvVoltage, "Vdc")}</div>
-                            <div><strong>กระแส PV:</strong> ${formatUnitDisplay(inv.pvCurrent, "Idc")}</div>
+                            <div><strong>แรงดันเฉลี่ย:</strong> ${formatUnitDisplay(inv.pvVoltage, "Vdc")}</div>
+                            <div><strong>กระแสเฉลี่ย:</strong> ${formatUnitDisplay(inv.pvCurrent, "Idc")}</div>
                             <div><strong>อุณหภูมิ Inverter:</strong> ${formatUnitDisplay(inv.inverterTemp, "°C")}</div>
-                            <div style="grid-column: span 2;"><strong>อุณหภูมิภายในตู้ AJB:</strong> ${formatUnitDisplay(inv.ajbTemp, "°C")}</div>
                         </div>
+                        ${buildStringsPrintMatrixHtml(inv.strings)}
                     `;
                     printInvSummary.appendChild(card);
                 });
@@ -1939,13 +2146,16 @@ function viewReportDetail(id) {
         }
     }
     
-    document.getElementById("print-recommendation-text").innerText = report.recommendations || "ระบบอยู่ในเกณฑ์สมบูรณ์ ไม่มีความเสียหายจำเพาะเจาะจงที่จำเป็นต้องซ่อมบำรุงในเวลานี้";
+    const recEl = document.getElementById("print-recommendation-text");
+    if (recEl) recEl.innerText = report.recommendations || "ระบบอยู่ในเกณฑ์สมบูรณ์ ไม่มีความเสียหายจำเพาะเจาะจงที่จำเป็นต้องซ่อมบำรุงในเวลานี้";
 
     const techSignName = report.primarySigner || (report.technicianName && typeof report.technicianName === 'string' ? report.technicianName.split(",")[0].trim() : "");
-    document.getElementById("print-sign-tech").innerText = techSignName;
+    const techSignEl = document.getElementById("print-sign-tech");
+    if (techSignEl) techSignEl.innerText = techSignName;
 
     const custSignName = report.customerName && typeof report.customerName === 'string' ? report.customerName.split(" (")[0] : "";
-    document.getElementById("print-sign-cust").innerText = custSignName;
+    const custSignEl = document.getElementById("print-sign-cust");
+    if (custSignEl) custSignEl.innerText = custSignName;
 
     // Photos Gallery
     const photoSection = document.getElementById("print-photos-section");
@@ -2018,6 +2228,45 @@ function translateMaintenanceType(type) {
     }
 }
 
+// Helper to build 14 DC Strings Input Grid HTML
+function buildStringsGridHtml(stringsData = [], fallbackVoltage = '', fallbackCurrent = '') {
+    let html = `
+        <div class="strings-input-container">
+            <div class="strings-input-header">
+                <span><i data-lucide="zap" style="width:14px; height:14px;"></i> ค่าแรงดันและกระแส DC แยกตาม String (1 - 14 Strings)</span>
+                <small style="color: var(--text-muted); font-size: 0.72rem;">ช่องใส่ตัวเลข Vdc (V) และ Idc (A) แยกแต่ละ String</small>
+            </div>
+            <div class="strings-grid">
+    `;
+    
+    for (let i = 1; i <= 14; i++) {
+        let vdcVal = "";
+        let idcVal = "";
+        
+        if (Array.isArray(stringsData) && stringsData.length >= i && stringsData[i - 1]) {
+            vdcVal = stringsData[i - 1].vdc !== undefined && stringsData[i - 1].vdc !== null ? stringsData[i - 1].vdc : "";
+            idcVal = stringsData[i - 1].idc !== undefined && stringsData[i - 1].idc !== null ? stringsData[i - 1].idc : "";
+        } else if (i === 1 && (!stringsData || stringsData.length === 0)) {
+            vdcVal = fallbackVoltage || "";
+            idcVal = fallbackCurrent || "";
+        }
+
+        html += `
+            <div class="string-row-item">
+                <span class="string-label-badge">Str ${i}</span>
+                <input type="number" step="any" class="inv-string-vdc" data-string="${i}" value="${vdcVal}" placeholder="Vdc (V)">
+                <input type="number" step="any" class="inv-string-idc" data-string="${i}" value="${idcVal}" placeholder="Idc (A)">
+            </div>
+        `;
+    }
+    
+    html += `
+            </div>
+        </div>
+    `;
+    return html;
+}
+
 // Inverters management
 function addInverterInput(name = "", values = {}) {
     const container = document.getElementById("inverters-form-container");
@@ -2033,38 +2282,29 @@ function addInverterInput(name = "", values = {}) {
                 <i data-lucide="trash-2"></i>
             </button>
         </div>
-        <div class="form-row">
-            <div class="form-group col-4">
+        <div class="form-row" style="margin-bottom: 10px;">
+            <div class="form-group col-3">
                 <label>ชื่อ/หมายเลขอินเวอร์เตอร์ <span class="required">*</span></label>
                 <input type="text" class="inv-name" value="${invName}" placeholder="เช่น Inverter 1">
             </div>
-            <div class="form-group col-4">
+            <div class="form-group col-3">
                 <label>ยี่ห้อ/รุ่นอินเวอร์เตอร์</label>
                 <input type="text" class="inv-model" value="${values.model || ''}" placeholder="เช่น Huawei SUN2000-50KTL">
             </div>
-            <div class="form-group col-4">
+            <div class="form-group col-2">
                 <label>กำลังผลิต AC (kW) <span class="required">*</span></label>
                 <input type="text" class="inv-ac-power" value="${values.acPower || ''}" placeholder="เช่น 125 kW">
             </div>
-        </div>
-        <div class="form-row">
-            <div class="form-group col-3">
-                <label>แรงดัน PV เฉลี่ย (Vdc)</label>
-                <input type="text" class="inv-pv-voltage" value="${values.pvVoltage || ''}" placeholder="เช่น 808 หรือ 808/815">
-            </div>
-            <div class="form-group col-3">
-                <label>กระแส PV เฉลี่ย (Idc)</label>
-                <input type="text" class="inv-pv-current" value="${values.pvCurrent || ''}" placeholder="เช่น 4.5 หรือ 4.5-5.0">
-            </div>
-            <div class="form-group col-3">
-                <label>อุณหภูมิอินเวอร์เตอร์ (°C)</label>
+            <div class="form-group col-2">
+                <label>อุณหภูมิ Inverter (°C)</label>
                 <input type="text" class="inv-temp" value="${values.inverterTemp || ''}" placeholder="เช่น 45">
             </div>
-            <div class="form-group col-3">
-                <label>อุณหภูมิอุปกรณ์ภายในตู้ AJB (°C)</label>
+            <div class="form-group col-2">
+                <label>อุณหภูมิภายในตู้ AJB (°C)</label>
                 <input type="text" class="inv-ajb-temp" value="${values.ajbTemp || ''}" placeholder="เช่น 38">
             </div>
         </div>
+        ${buildStringsGridHtml(values.strings, values.pvVoltage, values.pvCurrent)}
     `;
     
     const deleteBtn = card.querySelector(".btn-remove-inverter");
@@ -2080,6 +2320,7 @@ function addInverterInput(name = "", values = {}) {
     container.appendChild(card);
     lucide.createIcons();
 }
+
 
 function renameInverters() {
     const cards = document.querySelectorAll("#inverters-form-container .inverter-entry-card");
@@ -2383,7 +2624,50 @@ function editReport(id) {
     renderImagesPreview("cmBefore");
     renderImagesPreview("cmAfter");
     
-    // Trigger change event to toggle proper forms UI (PM vs CM)
+    // Prefill Defect fields
+    const defectContainer = document.getElementById("defect-items-container");
+    if (defectContainer) {
+        defectContainer.innerHTML = "";
+        defectCardCounter = 0;
+        if (report.defectItems && report.defectItems.length > 0) {
+            report.defectItems.forEach(item => {
+                addDefectCard(item);
+                const lastCard = defectContainer.lastElementChild;
+                if (lastCard) {
+                    if (item.imagesBefore && item.imagesBefore.length > 0) {
+                        lastCard.imagesBefore = [...item.imagesBefore];
+                        const prevBefore = lastCard.querySelector(".defect-preview-before");
+                        if (prevBefore) {
+                            item.imagesBefore.forEach(img => {
+                                prevBefore.innerHTML += `
+                                    <div style="position: relative; width: 60px; height: 60px;">
+                                        <img src="${img}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color);">
+                                    </div>`;
+                            });
+                        }
+                    }
+                    if (item.imagesAfter && item.imagesAfter.length > 0) {
+                        lastCard.imagesAfter = [...item.imagesAfter];
+                        const prevAfter = lastCard.querySelector(".defect-preview-after");
+                        if (prevAfter) {
+                            item.imagesAfter.forEach(img => {
+                                prevAfter.innerHTML += `
+                                    <div style="position: relative; width: 60px; height: 60px;">
+                                        <img src="${img}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-color);">
+                                    </div>`;
+                            });
+                        }
+                    }
+                }
+            });
+        }
+    }
+    const enspireUserEl = document.getElementById("enspire-user");
+    const enspirePassEl = document.getElementById("enspire-password");
+    if (enspireUserEl) enspireUserEl.value = report.enspireUser || "installer";
+    if (enspirePassEl) enspirePassEl.value = report.enspirePassword || "Changemekke";
+
+    // Trigger change event to toggle proper forms UI (PM vs CM vs Defect)
     document.getElementById("maintenance-type").dispatchEvent(new Event('change'));
 
     // Images
@@ -2704,6 +2988,23 @@ const kkeProjectMasterList = [
     { name: "PTT chester grill", province: "มหาสารคาม", district: "เมืองมหาสารคาม", size: "34.56" }
 ];
 
+// Load custom sites saved by user in LocalStorage
+(function loadCustomSitesFromStorage() {
+    const stored = localStorage.getItem("solar_custom_sites");
+    if (stored) {
+        try {
+            const customList = JSON.parse(stored);
+            if (Array.isArray(customList)) {
+                customList.forEach(cs => {
+                    if (cs && cs.name && !kkeProjectMasterList.some(p => p.name === cs.name)) {
+                        kkeProjectMasterList.unshift(cs);
+                    }
+                });
+            }
+        } catch(e) {}
+    }
+})();
+
 function initProjectAutocomplete() {
     const datalist = document.getElementById("kke-projects-list");
     const customerInput = document.getElementById("customer-name");
@@ -2724,8 +3025,12 @@ function initProjectAutocomplete() {
             const val = customerInput.value.trim();
             const match = kkeProjectMasterList.find(p => p.name.toLowerCase() === val.toLowerCase());
             if (match) {
-                if (sizeInput) {
-                    sizeInput.value = match.size ? `${match.size} kWp` : "";
+                if (sizeInput && match.size) {
+                    sizeInput.value = String(match.size).toLowerCase().includes("kwp") ? match.size : `${match.size} kWp`;
+                }
+                if (locationInput) {
+                    const locStr = [match.province, match.district].filter(Boolean).join(" ");
+                    if (locStr) locationInput.value = locStr;
                 }
             }
         };
@@ -2735,8 +3040,91 @@ function initProjectAutocomplete() {
     }
 }
 
+function selectSiteForNewReport(siteName) {
+    const match = kkeProjectMasterList.find(p => p.name === siteName);
+    if (window.switchTab) window.switchTab("new-report");
+    window.scrollTo(0, 0);
+
+    const custInput = document.getElementById("customer-name");
+    const locInput = document.getElementById("installation-location");
+    const sizeInput = document.getElementById("system-size");
+
+    if (custInput) custInput.value = siteName;
+    if (match) {
+        if (sizeInput && match.size) sizeInput.value = String(match.size).toLowerCase().includes("kwp") ? match.size : `${match.size} kWp`;
+        if (locInput) {
+            const locStr = [match.province, match.district].filter(Boolean).join(" ");
+            if (locStr) locInput.value = locStr;
+        }
+    }
+}
+window.selectSiteForNewReport = selectSiteForNewReport;
+
+function initAddSiteHandlers() {
+    const addSiteBtn = document.getElementById("btn-add-new-site");
+    const modal = document.getElementById("add-site-modal");
+    const closeBtn = document.getElementById("btn-close-add-site-modal");
+    const cancelBtn = document.getElementById("btn-cancel-add-site");
+    const form = document.getElementById("add-site-form");
+
+    if (addSiteBtn && modal) {
+        addSiteBtn.addEventListener("click", () => {
+            modal.style.display = "flex";
+        });
+    }
+
+    const closeModal = () => {
+        if (modal) modal.style.display = "none";
+        if (form) form.reset();
+    };
+
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+    if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+
+    if (form) {
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const name = document.getElementById("new-site-name").value.trim();
+            const size = document.getElementById("new-site-size").value.trim();
+            const province = document.getElementById("new-site-province").value.trim();
+            const district = document.getElementById("new-site-district").value.trim();
+
+            if (!name || !size || !province) {
+                alert("กรุณากรอกข้อมูลชื่อไซต์, กำลังผลิต และจังหวัดให้ครบถ้วน");
+                return;
+            }
+
+            const newSite = { name, size, province, district };
+            
+            // Check duplicate
+            if (kkeProjectMasterList.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+                alert(`มีข้อมูลไซต์งาน "${name}" อยู่ในระบบแล้ว`);
+                return;
+            }
+
+            kkeProjectMasterList.unshift(newSite);
+
+            // Save custom sites to LocalStorage
+            let customSites = [];
+            const stored = localStorage.getItem("solar_custom_sites");
+            if (stored) {
+                try { customSites = JSON.parse(stored); } catch(e) {}
+            }
+            customSites.unshift(newSite);
+            localStorage.setItem("solar_custom_sites", JSON.stringify(customSites));
+
+            initProjectAutocomplete();
+            renderSitesTable();
+
+            closeModal();
+            alert(`เพิ่มไซต์งาน "${name}" เรียบร้อยแล้ว!`);
+        });
+    }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     initProjectAutocomplete();
+    initAddSiteHandlers();
 
     // Event listeners for site master tab search & filter
     const siteSearchInput = document.getElementById("site-search-input");
@@ -2815,6 +3203,7 @@ function renderSitesTable() {
     filteredSites.forEach((s, idx) => {
         const tr = document.createElement("tr");
 
+        const locationText = [s.province, s.district].filter(Boolean).join(" ");
         const actionHtml = `<button type="button" class="btn btn-primary btn-sm" onclick="selectSiteForNewReport('${s.name}')" style="padding: 4px 10px; font-size: 0.78rem;"><i data-lucide="plus" style="width: 14px; height: 14px;"></i> <span>ออกรายงาน</span></button>`;
 
         tr.innerHTML = `
@@ -2823,6 +3212,7 @@ function renderSitesTable() {
                 <strong style="color: var(--text-primary); font-size: 0.92rem;">${s.name}</strong>
                 ${s.zone ? `<span style="display: block; font-size: 0.72rem; color: var(--text-secondary); margin-top: 2px;">${s.zone}</span>` : ''}
             </td>
+            <td><span style="font-size: 0.85rem; color: var(--text-secondary);">${locationText || '-'}</span></td>
             <td><span style="font-weight: 700; color: var(--primary-solar);">${s.size}</span> kWp</td>
             <td style="text-align: right;">${actionHtml}</td>
         `;

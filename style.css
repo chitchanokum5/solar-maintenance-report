@@ -1171,14 +1171,60 @@ input[type="range"]::-webkit-slider-thumb:hover {
 }
 
 .report-paper {
-    background-color: #fff;
-    color: #1e293b;
+    background-color: #ffffff !important;
+    color: #1e293b !important;
     border-radius: 4px;
     padding: 2.5rem; /* Web preview padding */
     box-shadow: 0 10px 40px rgba(0,0,0,0.5);
     max-width: 8.27in; /* A4 Width */
     margin: 0 auto;
     position: relative;
+}
+
+/* Ensure all text inside report paper preview stays sharp slate/black regardless of active app theme */
+.report-paper h1,
+.report-paper h2,
+.report-paper h3,
+.report-paper h4,
+.report-paper h5,
+.report-paper h6,
+.report-paper strong,
+.report-paper th {
+    color: #0f172a !important;
+}
+
+.report-paper p,
+.report-paper td,
+.report-paper span:not(.badge-print):not(.badge),
+.report-paper div:not(.badge-print):not(.badge):not(.kpi-icon) {
+    color: #334155 !important;
+}
+
+.report-paper small,
+.report-paper .desc,
+.report-paper .text-muted {
+    color: #64748b !important;
+}
+
+.report-paper table,
+.report-paper tr,
+.report-paper td,
+.report-paper th {
+    border-color: #cbd5e1 !important;
+}
+
+.report-paper .measurement-print-table th,
+.report-paper .checklist-print-table th,
+.report-paper .print-strings-matrix-table th {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+.report-paper .measurement-print-table td,
+.report-paper .checklist-print-table td,
+.report-paper .print-strings-matrix-table td {
+    background-color: #ffffff !important;
+    color: #334155 !important;
 }
 
 /* Header style inside print preview */
@@ -1544,7 +1590,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
     .print-summary-inverter-card,
     .print-photo-item,
     .print-sign-off,
-    .checklist-print-table tr {
+    .checklist-print-table tr,
+    .print-inverter-block {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
     }
@@ -1897,6 +1944,93 @@ input[type="range"]::-webkit-slider-thumb:hover {
         width: 100%;
     }
 }
+
+/* ==========================================
+   14 DC STRINGS INVERTER INPUT STYLES
+   ========================================== */
+.strings-input-container {
+    background-color: rgba(15, 23, 42, 0.35);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: 12px;
+    margin-top: 10px;
+    margin-bottom: 12px;
+}
+
+.strings-input-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.strings-input-header span {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--primary-solar);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.strings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px 12px;
+}
+
+.string-row-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 4px 8px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.string-label-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    min-width: 48px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 3px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.string-row-item input {
+    padding: 4px 6px !important;
+    font-size: 0.8rem !important;
+    height: 32px !important;
+    text-align: center;
+}
+
+/* Printable Strings Table */
+.print-strings-matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.72rem;
+    margin-top: 6px;
+}
+
+.print-strings-matrix-table th,
+.print-strings-matrix-table td {
+    border: 1px solid #cbd5e1;
+    padding: 3px 6px;
+    text-align: center;
+}
+
+.print-strings-matrix-table th {
+    background-color: #f8fafc;
+    color: #334155;
+    font-weight: 600;
+}
+
 
 /* Success Notification Modal */
 .modal-overlay {
