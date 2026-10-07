@@ -690,10 +690,12 @@ function initTabs() {
         "dashboard": { title: "แดชบอร์ดสรุปผล", subtitle: "ภาพรวมระบบและการตรวจเช็คล่าสุด" },
         "new-report": { title: "สร้างรายงานซ่อมบำรุง", subtitle: "กรอกข้อมูลรายละเอียดการเข้าตรวจเช็คหน้างาน" },
         "history": { title: "ประวัติการซ่อมบำรุง", subtitle: "ตารางสรุปรายการตรวจซ่อมโซล่าเซลล์ที่ผ่านมาทั้งหมด" },
+        "work-permit": { title: "ใบขออนุญาตเข้าทำงาน", subtitle: "รายการและออกเอกสารขอเข้าปฏิบัติงานหน้างาน (Work Permit)" },
         "team": { title: "รายชื่อทีมงาน O&M", subtitle: "ผังวิศวกร ช่างเทคนิค และบุคลากรทีม Operation and Maintenance (12 ท่าน)" },
         "sites": { title: "รายชื่อไซต์งานทั้งหมด", subtitle: "ตารางสรุปรายชื่อไซต์งานระบบโซล่าเซลล์ 156 แห่ง" },
         "calendar": { title: "ปฏิทินการเข้าตรวจเช็คระบบ", subtitle: "บันทึกและแสดงกำหนดการออกรายงานประจำวันและรายเดือน" },
-        "report-view": { title: "เอกสารรายงานผล", subtitle: "มุมมองเพื่อพิมพ์รายงานหรือบันทึกไฟล์เป็น PDF" }
+        "report-view": { title: "เอกสารรายงานผล", subtitle: "มุมมองเพื่อพิมพ์รายงานหรือบันทึกไฟล์เป็น PDF" },
+        "work-permit-print": { title: "พิมพ์เอกสารขอเข้าทำงาน", subtitle: "มุมมองพิมพ์เอกสารทางการ A4 เพื่อยื่นขออนุญาตลูกค้า" }
     };
 
     let currentTabId = "dashboard";
@@ -702,7 +704,7 @@ function initTabs() {
     function switchTab(tabId) {
         window.scrollTo(0, 0);
 
-        if (tabId !== "report-view" && tabId !== currentTabId) {
+        if (tabId !== "report-view" && tabId !== "work-permit-print" && tabId !== currentTabId) {
             previousTabId = (currentTabId === "new-report") ? "history" : currentTabId;
         }
         currentTabId = tabId;
@@ -737,6 +739,8 @@ function initTabs() {
         } else if (tabId === "history") {
             renderHistoryTable();
             fetchSharedCloudReports(false);
+        } else if (tabId === "work-permit") {
+            if (typeof renderWorkPermitsTable === "function") renderWorkPermitsTable();
         } else if (tabId === "team") {
             renderTeamGrid();
         } else if (tabId === "sites") {
@@ -4399,3 +4403,794 @@ function handleFetchResponse(response) {
     }
     return response.json();
 }
+
+// =========================================================================
+// WORK PERMIT (ใบขออนุญาตเข้าทำงาน) MODULE
+// =========================================================================
+
+const defaultWorkPermitsList = [
+    {
+        id: "WP-20261007-001",
+        docNumber: "O&M0041/2568",
+        docDate: "2026-10-07",
+        serviceOrderNumber: "",
+        projectName: "FAST Factory 1",
+        companyName: "ฟูรูกาวา ออร์โตโมทีฟ ซีสเต็มส์ (ประเทศไทย)",
+        location: "Pinthong Industrial Estate 789/72 หมู่.1 ตำบล หนองขาม อำเภอศรีราชา ชลบุรี 20230",
+        contactName: "",
+        startDate: "2569-10-09",
+        safetyScope: "ไม่ต้องมี จป.วิชาชีพ",
+        safetyScopeOther: "",
+        controlScope: "หัวหน้าช่างเทคนิค",
+        controlScopeOther: "",
+        engineerLevel: "",
+        supervisors: [
+            { name: "น.ส. นุชนาฏ คำผุย", phone: "095-2925300", role: "Senior Foreman" }
+        ],
+        workers: [
+            { seq: 1, name: "น.ส. นุชนาฏ คำผุย", idCard: "1401701232604", phone: "095-2925300", remark: "" },
+            { seq: 2, name: "นายอรุณ ฝ่ายแก้ว", idCard: "1409901538305", phone: "-", remark: "" }
+        ],
+        createdAt: "2026-10-07T08:00:00.000Z"
+    },
+    {
+        id: "WP-20261007-002",
+        docNumber: "O&M0042/2568",
+        docDate: "2026-10-07",
+        serviceOrderNumber: "",
+        projectName: "Brose Project Solar Rooftop 249.60kWp",
+        companyName: "Brose (Thailand) Co., Ltd.",
+        location: "890/14, Moo 3, WHA Eastern Seaboard Industrial Estate 2 ตำบล เขาคันทรง Sriracha, ชลบุรี 20110",
+        contactName: "",
+        startDate: "2569-10-09",
+        safetyScope: "ไม่ต้องมี จป.วิชาชีพ",
+        safetyScopeOther: "",
+        controlScope: "หัวหน้าช่างเทคนิค",
+        controlScopeOther: "",
+        engineerLevel: "",
+        supervisors: [
+            { name: "น.ส. นุชนาฏ คำผุย", phone: "095-2925300", role: "Senior Foreman" }
+        ],
+        workers: [
+            { seq: 1, name: "น.ส. นุชนาฏ คำผุย", idCard: "1401701232604", phone: "095-2925300", remark: "" },
+            { seq: 2, name: "นายอรุณ ฝ่ายแก้ว", idCard: "1409901538305", phone: "-", remark: "" }
+        ],
+        createdAt: "2026-10-07T08:15:00.000Z"
+    },
+    {
+        id: "WP-20261007-003",
+        docNumber: "O&M0043/2568",
+        docDate: "2026-10-07",
+        serviceOrderNumber: "",
+        projectName: "RIKA JTW HEAT TREATMENT 1329.90kW",
+        companyName: "RIKA JTW HEAT TREATMENT",
+        location: "789/63 ตำบล หนองขาม อำเภอศรีราชา ชลบุรี 20230",
+        contactName: "",
+        startDate: "10/10/2569-11/10/2569",
+        safetyScope: "ไม่ต้องมี จป.วิชาชีพ",
+        safetyScopeOther: "",
+        controlScope: "หัวหน้าช่างเทคนิค",
+        controlScopeOther: "",
+        engineerLevel: "",
+        supervisors: [
+            { name: "น.ส. นุชนาฏ คำผุย", phone: "095-2925300", role: "Senior Foreman" }
+        ],
+        workers: [
+            { seq: 1, name: "น.ส. นุชนาฏ คำผุย", idCard: "1401701232604", phone: "095-2925300", remark: "" },
+            { seq: 2, name: "นายอรุณ ฝ่ายแก้ว", idCard: "1409901538305", phone: "-", remark: "" }
+        ],
+        createdAt: "2026-10-07T08:30:00.000Z"
+    },
+    {
+        id: "WP-20261007-004",
+        docNumber: "O&M0044/2568",
+        docDate: "2026-10-07",
+        serviceOrderNumber: "",
+        projectName: "A-PLA HIGHTECH",
+        companyName: "บริษัท เอ-พลา ไฮเทค จำกัด สาขา2",
+        location: "244 48 ตำบล บ่อวิน อำเภอศรีราชา ชลบุรี 20110",
+        contactName: "",
+        startDate: "2569-10-07",
+        safetyScope: "ไม่ต้องมี จป.วิชาชีพ",
+        safetyScopeOther: "",
+        controlScope: "หัวหน้าช่างเทคนิค",
+        controlScopeOther: "",
+        engineerLevel: "",
+        supervisors: [
+            { name: "น.ส. นุชนาฏ คำผุย", phone: "095-2925300", role: "Senior Foreman" }
+        ],
+        workers: [
+            { seq: 1, name: "น.ส. นุชนาฏ คำผุย", idCard: "1401701232604", phone: "095-2925300", remark: "" },
+            { seq: 2, name: "นายอรุณ ฝ่ายแก้ว", idCard: "1409901538305", phone: "-", remark: "" }
+        ],
+        createdAt: "2026-10-07T08:45:00.000Z"
+    }
+];
+
+let workPermitsList = [];
+let currentViewingWorkPermitId = null;
+
+function loadWorkPermitsFromLocalStorage() {
+    const raw = localStorage.getItem("solar_work_permits");
+    if (raw) {
+        try {
+            workPermitsList = JSON.parse(raw);
+        } catch (e) {
+            console.error("Error parsing work permits:", e);
+            workPermitsList = [...defaultWorkPermitsList];
+        }
+    } else {
+        workPermitsList = [...defaultWorkPermitsList];
+        saveWorkPermitsToLocalStorage();
+    }
+}
+
+function saveWorkPermitsToLocalStorage() {
+    localStorage.setItem("solar_work_permits", JSON.stringify(workPermitsList));
+}
+
+// Render Work Permits Table
+function renderWorkPermitsTable(query = "") {
+    const tbody = document.getElementById("work-permits-table-body");
+    if (!tbody) return;
+
+    loadWorkPermitsFromLocalStorage();
+
+    const q = (query || document.getElementById("wp-search-input")?.value || "").toLowerCase().trim();
+    const filtered = workPermitsList.filter(wp => 
+        (wp.docNumber && wp.docNumber.toLowerCase().includes(q)) ||
+        (wp.projectName && wp.projectName.toLowerCase().includes(q)) ||
+        (wp.companyName && wp.companyName.toLowerCase().includes(q)) ||
+        (wp.location && wp.location.toLowerCase().includes(q)) ||
+        (wp.supervisors && wp.supervisors.some(s => s.name.toLowerCase().includes(q)))
+    );
+
+    // Update KPI stats
+    const totalEl = document.getElementById("wp-stat-total");
+    const projEl = document.getElementById("wp-stat-projects");
+    const workerEl = document.getElementById("wp-stat-workers");
+
+    if (totalEl) totalEl.innerText = workPermitsList.length;
+    if (projEl) {
+        const uniqueProjects = new Set(workPermitsList.map(w => w.projectName.trim()));
+        projEl.innerText = uniqueProjects.size;
+    }
+    if (workerEl) {
+        let totalWorkers = 0;
+        workPermitsList.forEach(w => {
+            totalWorkers += (w.workers ? w.workers.length : 0);
+        });
+        workerEl.innerText = totalWorkers;
+    }
+
+    tbody.innerHTML = "";
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                    <i data-lucide="file-x" style="width: 36px; height: 36px; margin-bottom: 8px; opacity: 0.5;"></i>
+                    <div>ไม่พบข้อมูลใบขออนุญาตเข้าทำงาน</div>
+                </td>
+            </tr>
+        `;
+        if (window.lucide) lucide.createIcons();
+        return;
+    }
+
+    filtered.forEach(wp => {
+        const tr = document.createElement("tr");
+        const supNames = (wp.supervisors && wp.supervisors.length > 0) 
+            ? wp.supervisors.map(s => s.name).join(", ") 
+            : "-";
+        const workersCount = (wp.workers && wp.workers.length > 0) ? wp.workers.length : 0;
+
+        tr.innerHTML = `
+            <td style="font-weight: 600; color: var(--primary-solar);">
+                ${wp.docNumber || "-"}
+            </td>
+            <td style="color: var(--text-secondary); font-size: 0.85rem;">
+                ${wp.docDate || "-"}
+            </td>
+            <td>
+                <div style="font-weight: 600; color: var(--text-primary);">${wp.projectName || "-"}</div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);">${wp.companyName || ""}</div>
+            </td>
+            <td style="font-size: 0.82rem; color: var(--text-secondary); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${wp.location || ''}">
+                ${wp.location || "-"}
+            </td>
+            <td style="font-size: 0.85rem; color: #10b981; font-weight: 500;">
+                ${wp.startDate || "-"}
+            </td>
+            <td style="font-size: 0.82rem; color: var(--text-primary);">
+                ${supNames}
+            </td>
+            <td style="text-align: center;">
+                <span style="display: inline-block; padding: 2px 8px; border-radius: 12px; background: rgba(59, 130, 246, 0.15); color: #3b82f6; font-size: 0.78rem; font-weight: 600;">
+                    ${workersCount} ท่าน
+                </span>
+            </td>
+            <td style="text-align: center;">
+                <div style="display: inline-flex; gap: 6px; align-items: center;">
+                    <button class="btn btn-outline btn-sm" onclick="viewWorkPermitPrint('${wp.id}')" title="ดูเอกสาร / พิมพ์ PDF" style="padding: 4px 8px;">
+                        <i data-lucide="printer" style="width: 14px; height: 14px; color: #10b981;"></i>
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="openEditWorkPermitModal('${wp.id}')" title="แก้ไข" style="padding: 4px 8px;">
+                        <i data-lucide="edit-3" style="width: 14px; height: 14px; color: #3b82f6;"></i>
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="deleteWorkPermit('${wp.id}')" title="ลบ" style="padding: 4px 8px; color: var(--status-danger);">
+                        <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    if (window.lucide) lucide.createIcons();
+}
+
+// Supervisor Rows in Modal Form
+function addSupervisorRow(name = "", phone = "", role = "") {
+    const container = document.getElementById("wp-supervisors-container");
+    if (!container) return;
+
+    const row = document.createElement("div");
+    row.className = "wp-sup-row";
+    row.style.cssText = "display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.02); padding: 6px; border-radius: 6px; border: 1px solid var(--border-color);";
+
+    // Quick team selector options
+    let teamOptions = `<option value="">-- เลือกจากทีมงาน --</option>`;
+    if (typeof teamMembersList !== "undefined") {
+        teamMembersList.forEach(m => {
+            teamOptions += `<option value="${m.name}" data-phone="${m.phone}" data-role="${m.role}">${m.name} (${m.role})</option>`;
+        });
+    }
+
+    row.innerHTML = `
+        <select class="wp-sup-preset" style="width: 160px; padding: 0.45rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.8rem;">
+            ${teamOptions}
+        </select>
+        <input type="text" class="wp-sup-name" placeholder="ชื่อ-สกุล ผู้ควบคุมงาน" required value="${name}" style="flex: 1.2; padding: 0.45rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
+        <input type="text" class="wp-sup-phone" placeholder="เบอร์โทรศัพท์" value="${phone}" style="flex: 1; padding: 0.45rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
+        <input type="text" class="wp-sup-role" placeholder="ตำแหน่ง เช่น Senior Foreman" value="${role}" style="flex: 1; padding: 0.45rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
+        <button type="button" class="btn btn-outline btn-sm wp-btn-del-sup" style="padding: 4px 8px; color: var(--status-danger);" title="ลบ">&times;</button>
+    `;
+
+    const selectEl = row.querySelector(".wp-sup-preset");
+    selectEl.addEventListener("change", (e) => {
+        const opt = e.target.selectedOptions[0];
+        if (opt && opt.value) {
+            row.querySelector(".wp-sup-name").value = opt.value;
+            row.querySelector(".wp-sup-phone").value = opt.dataset.phone || "";
+            row.querySelector(".wp-sup-role").value = opt.dataset.role || "";
+        }
+    });
+
+    row.querySelector(".wp-btn-del-sup").addEventListener("click", () => {
+        if (container.querySelectorAll(".wp-sup-row").length > 1) {
+            row.remove();
+        } else {
+            alert("ต้องมีผู้ควบคุมงานอย่างน้อย 1 ท่าน");
+        }
+    });
+
+    container.appendChild(row);
+}
+
+// Worker Rows in Modal Form
+function addWorkerRow(name = "", idCard = "", phone = "", remark = "") {
+    const tbody = document.getElementById("wp-workers-tbody");
+    if (!tbody) return;
+
+    const rowCount = tbody.querySelectorAll("tr").length + 1;
+    const tr = document.createElement("tr");
+    tr.className = "wp-worker-tr";
+    tr.style.borderBottom = "1px solid var(--border-color)";
+
+    tr.innerHTML = `
+        <td style="padding: 6px; text-align: center; color: var(--text-muted); font-weight: 600;" class="wp-worker-seq">${rowCount}</td>
+        <td style="padding: 6px;">
+            <input type="text" class="wp-worker-name" placeholder="ชื่อ-สกุล" required value="${name}" style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
+        </td>
+        <td style="padding: 6px;">
+            <input type="text" class="wp-worker-idcard" placeholder="เลข 13 หลัก" value="${idCard}" maxlength="17" style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
+        </td>
+        <td style="padding: 6px;">
+            <input type="text" class="wp-worker-phone" placeholder="เบอร์โทร" value="${phone}" style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
+        </td>
+        <td style="padding: 6px;">
+            <input type="text" class="wp-worker-remark" placeholder="หมายเหตุ" value="${remark}" style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
+        </td>
+        <td style="padding: 6px; text-align: center;">
+            <button type="button" class="btn btn-outline btn-sm wp-btn-del-worker" style="padding: 2px 6px; font-size: 0.75rem; color: var(--status-danger);" title="ลบ">&times;</button>
+        </td>
+    `;
+
+    tr.querySelector(".wp-btn-del-worker").addEventListener("click", () => {
+        tr.remove();
+        reindexWorkerRows();
+    });
+
+    tbody.appendChild(tr);
+}
+
+function reindexWorkerRows() {
+    const tbody = document.getElementById("wp-workers-tbody");
+    if (!tbody) return;
+    tbody.querySelectorAll("tr").forEach((tr, idx) => {
+        const seqCell = tr.querySelector(".wp-worker-seq");
+        if (seqCell) seqCell.innerText = idx + 1;
+    });
+}
+
+// Import Team to Workers Table
+function importTeamToWorkers() {
+    if (typeof teamMembersList === "undefined" || teamMembersList.length === 0) {
+        alert("ไม่มีรายชื่อในทีมงาน O&M");
+        return;
+    }
+
+    const tbody = document.getElementById("wp-workers-tbody");
+    if (!tbody) return;
+
+    // Check existing names to prevent duplicate imports
+    const existingNames = Array.from(tbody.querySelectorAll(".wp-worker-name")).map(i => i.value.trim());
+
+    let addedCount = 0;
+    teamMembersList.forEach(m => {
+        if (!existingNames.includes(m.name)) {
+            addWorkerRow(m.name, m.idCard || "-", m.phone || "-", "");
+            addedCount++;
+        }
+    });
+
+    if (addedCount > 0) {
+        alert(`ดึงรายชื่อจากทีมงาน O&M สำเร็จ ${addedCount} ท่าน`);
+    } else {
+        alert("รายชื่อทีมงานทั้งหมดมีอยู่ในตารางแล้ว");
+    }
+}
+
+// Populate Project Sites Dropdown
+function populateWpMasterSitesDropdown() {
+    const select = document.getElementById("wp-select-master-site");
+    if (!select || select.dataset.loaded === "true") return;
+
+    if (typeof kkeProjectMasterList !== "undefined" && kkeProjectMasterList.length > 0) {
+        kkeProjectMasterList.forEach(site => {
+            const opt = document.createElement("option");
+            opt.value = site.name;
+            opt.innerText = `${site.name} (${site.province || ''} ${site.district || ''} - ${site.size} kWp)`;
+            opt.dataset.province = site.province || "";
+            opt.dataset.district = site.district || "";
+            select.appendChild(opt);
+        });
+        select.dataset.loaded = "true";
+    }
+
+    select.addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (!val) return;
+        const opt = e.target.selectedOptions[0];
+        document.getElementById("wp-input-project-name").value = val;
+        document.getElementById("wp-input-company-name").value = val;
+        if (opt) {
+            const loc = `${opt.dataset.district || ''} จ.${opt.dataset.province || ''}`.trim();
+            if (loc) document.getElementById("wp-input-location").value = loc;
+        }
+    });
+}
+
+// Open Create Modal
+function openCreateWorkPermitModal() {
+    const modal = document.getElementById("modal-work-permit-form");
+    if (!modal) return;
+
+    populateWpMasterSitesDropdown();
+
+    document.getElementById("wp-edit-id").value = "";
+    document.getElementById("modal-wp-title").innerText = "สร้างใบขออนุญาตเข้าทำงาน (Work Permit)";
+
+    // Auto-generate next document number
+    const nextSeq = String(workPermitsList.length + 41).padStart(4, "0");
+    const currentYear = new Date().getFullYear() + 543;
+    document.getElementById("wp-input-doc-number").value = `O&M${nextSeq}/${currentYear}`;
+
+    // Today's date in YYYY-MM-DD
+    const todayStr = new Date().toISOString().split("T")[0];
+    document.getElementById("wp-input-doc-date").value = todayStr;
+    document.getElementById("wp-input-service-order").value = "";
+    document.getElementById("wp-input-project-name").value = "";
+    document.getElementById("wp-input-company-name").value = "";
+    document.getElementById("wp-input-contact-name").value = "";
+    document.getElementById("wp-input-location").value = "";
+    document.getElementById("wp-input-start-date").value = todayStr;
+
+    // Reset radio scopes
+    const safetyRadios = document.querySelectorAll("input[name='wp-safety-scope']");
+    safetyRadios.forEach(r => { r.checked = (r.value === "ไม่ต้องมี จป.วิชาชีพ"); });
+    document.getElementById("wp-safety-scope-other").style.display = "none";
+    document.getElementById("wp-safety-scope-other").value = "";
+
+    const controlRadios = document.querySelectorAll("input[name='wp-control-scope']");
+    controlRadios.forEach(r => { r.checked = (r.value === "หัวหน้าช่างเทคนิค"); });
+    document.getElementById("wp-control-scope-other").style.display = "none";
+    document.getElementById("wp-control-scope-other").value = "";
+
+    const engRadios = document.querySelectorAll("input[name='wp-engineer-level']");
+    engRadios.forEach(r => { r.checked = (r.value === ""); });
+
+    // Supervisors: Default with น.ส. นุชนาฏ คำผุย
+    const supContainer = document.getElementById("wp-supervisors-container");
+    supContainer.innerHTML = "";
+    addSupervisorRow("น.ส. นุชนาฏ คำผุย", "095-2925300", "Senior Foreman");
+
+    // Workers: Default with standard technicians
+    const workersTbody = document.getElementById("wp-workers-tbody");
+    workersTbody.innerHTML = "";
+    addWorkerRow("น.ส. นุชนาฏ คำผุย", "1401701232604", "095-2925300", "");
+    addWorkerRow("นายอรุณ ฝ่ายแก้ว", "1409901538305", "-", "");
+
+    modal.style.display = "flex";
+}
+
+// Open Edit Modal
+function openEditWorkPermitModal(id) {
+    const wp = workPermitsList.find(w => w.id === id);
+    if (!wp) return;
+
+    populateWpMasterSitesDropdown();
+
+    const modal = document.getElementById("modal-work-permit-form");
+    if (!modal) return;
+
+    document.getElementById("wp-edit-id").value = wp.id;
+    document.getElementById("modal-wp-title").innerText = `แก้ไขใบขอเข้าทำงาน (${wp.docNumber})`;
+
+    document.getElementById("wp-input-doc-number").value = wp.docNumber || "";
+    document.getElementById("wp-input-doc-date").value = wp.docDate || "";
+    document.getElementById("wp-input-service-order").value = wp.serviceOrderNumber || "";
+    document.getElementById("wp-input-project-name").value = wp.projectName || "";
+    document.getElementById("wp-input-company-name").value = wp.companyName || "";
+    document.getElementById("wp-input-contact-name").value = wp.contactName || "";
+    document.getElementById("wp-input-location").value = wp.location || "";
+    document.getElementById("wp-input-start-date").value = wp.startDate || "";
+
+    // Radios
+    const safetyRadios = document.querySelectorAll("input[name='wp-safety-scope']");
+    safetyRadios.forEach(r => { r.checked = (r.value === wp.safetyScope); });
+    const safetyOther = document.getElementById("wp-safety-scope-other");
+    if (wp.safetyScope === "อื่นๆ") {
+        safetyOther.style.display = "inline-block";
+        safetyOther.value = wp.safetyScopeOther || "";
+    } else {
+        safetyOther.style.display = "none";
+        safetyOther.value = "";
+    }
+
+    const controlRadios = document.querySelectorAll("input[name='wp-control-scope']");
+    controlRadios.forEach(r => { r.checked = (r.value === wp.controlScope); });
+    const controlOther = document.getElementById("wp-control-scope-other");
+    if (wp.controlScope === "อื่นๆ") {
+        controlOther.style.display = "inline-block";
+        controlOther.value = wp.controlScopeOther || "";
+    } else {
+        controlOther.style.display = "none";
+        controlOther.value = "";
+    }
+
+    const engRadios = document.querySelectorAll("input[name='wp-engineer-level']");
+    engRadios.forEach(r => { r.checked = (r.value === (wp.engineerLevel || "")); });
+
+    // Supervisors
+    const supContainer = document.getElementById("wp-supervisors-container");
+    supContainer.innerHTML = "";
+    if (wp.supervisors && wp.supervisors.length > 0) {
+        wp.supervisors.forEach(s => addSupervisorRow(s.name, s.phone, s.role));
+    } else {
+        addSupervisorRow("", "", "");
+    }
+
+    // Workers
+    const workersTbody = document.getElementById("wp-workers-tbody");
+    workersTbody.innerHTML = "";
+    if (wp.workers && wp.workers.length > 0) {
+        wp.workers.forEach(w => addWorkerRow(w.name, w.idCard, w.phone, w.remark));
+    } else {
+        addWorkerRow("", "", "", "");
+    }
+
+    modal.style.display = "flex";
+}
+
+// Delete Work Permit
+function deleteWorkPermit(id) {
+    const wp = workPermitsList.find(w => w.id === id);
+    if (!wp) return;
+
+    if (confirm(`คุณต้องการลบใบขออนุญาตเข้าทำงานเลขที่ "${wp.docNumber}" (${wp.projectName}) ใช่หรือไม่?`)) {
+        workPermitsList = workPermitsList.filter(w => w.id !== id);
+        saveWorkPermitsToLocalStorage();
+        renderWorkPermitsTable();
+    }
+}
+
+// View and Print Work Permit
+function viewWorkPermitPrint(id) {
+    const wp = workPermitsList.find(w => w.id === id);
+    if (!wp) return;
+
+    currentViewingWorkPermitId = id;
+
+    // Header info
+    document.getElementById("print-wp-doc-number").innerText = wp.docNumber || "-";
+    document.getElementById("print-wp-doc-date").innerText = wp.docDate || "-";
+
+    // Project table info
+    document.getElementById("print-wp-project-name").innerText = wp.projectName || "-";
+    document.getElementById("print-wp-company-name").innerText = wp.companyName || "-";
+    document.getElementById("print-wp-location").innerText = wp.location || "-";
+    document.getElementById("print-wp-contact-name").innerText = wp.contactName || "-";
+    document.getElementById("print-wp-service-order").innerText = wp.serviceOrderNumber || "-";
+    document.getElementById("print-wp-start-date").innerText = wp.startDate || "-";
+
+    // Scopes with Checkboxes
+    const safetyOptions = ["มี จป.วิชาชีพ", "ไม่ต้องมี จป.วิชาชีพ", "จป. หัวหน้างาน", "อื่นๆ"];
+    let safetyHtml = safetyOptions.map(opt => {
+        const isChecked = (wp.safetyScope === opt);
+        const checkClass = isChecked ? "checked" : "";
+        const label = (opt === "อื่นๆ" && isChecked && wp.safetyScopeOther) ? `อื่นๆ (${wp.safetyScopeOther})` : opt;
+        return `<span class="wp-scope-item"><span class="wp-checkbox-box ${checkClass}"></span> ${label}</span>`;
+    }).join("");
+    document.getElementById("print-wp-safety-scope").innerHTML = safetyHtml;
+
+    const controlOptions = ["มี วิศวกร", "ไม่ต้องมี วิศวกร", "หัวหน้าช่างเทคนิค", "อื่นๆ"];
+    let controlHtml = controlOptions.map(opt => {
+        const isChecked = (wp.controlScope === opt);
+        const checkClass = isChecked ? "checked" : "";
+        const label = (opt === "อื่นๆ" && isChecked && wp.controlScopeOther) ? `อื่นๆ (${wp.controlScopeOther})` : opt;
+        return `<span class="wp-scope-item"><span class="wp-checkbox-box ${checkClass}"></span> ${label}</span>`;
+    }).join("");
+    document.getElementById("print-wp-control-scope").innerHTML = controlHtml;
+
+    const engOptions = ["ภาคี", "สามัญ", "อื่นๆ"];
+    let engHtml = engOptions.map(opt => {
+        const isChecked = (wp.engineerLevel === opt);
+        const checkClass = isChecked ? "checked" : "";
+        return `<span class="wp-scope-item"><span class="wp-checkbox-box ${checkClass}"></span> ${opt}</span>`;
+    }).join("");
+    document.getElementById("print-wp-engineer-level").innerHTML = engHtml;
+
+    // Supervisors Table
+    const supTbody = document.getElementById("print-wp-supervisors-tbody");
+    supTbody.innerHTML = "";
+    if (wp.supervisors && wp.supervisors.length > 0) {
+        wp.supervisors.forEach((s, idx) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td style="text-align: center;">${idx + 1}</td>
+                <td><strong>${s.name || '-'}</strong></td>
+                <td>${s.phone || '-'}</td>
+                <td>${s.role || '-'}</td>
+            `;
+            supTbody.appendChild(tr);
+        });
+        // Signer info
+        const primarySup = wp.supervisors[0];
+        document.getElementById("print-wp-signer-kke").innerText = primarySup.name || "...................................................";
+        document.getElementById("print-wp-signer-role").innerText = primarySup.role || "Senior Foreman / ผู้ควบคุมงาน";
+    } else {
+        supTbody.innerHTML = `<tr><td colspan="4" style="text-align: center;">-</td></tr>`;
+    }
+
+    // Workers Table
+    const workerTbody = document.getElementById("print-wp-workers-tbody");
+    workerTbody.innerHTML = "";
+    if (wp.workers && wp.workers.length > 0) {
+        wp.workers.forEach((w, idx) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td style="text-align: center;">${idx + 1}</td>
+                <td><strong>${w.name || '-'}</strong></td>
+                <td style="font-family: monospace; letter-spacing: 0.5px;">${w.idCard || '-'}</td>
+                <td>${w.phone || '-'}</td>
+                <td>${w.remark || '-'}</td>
+            `;
+            workerTbody.appendChild(tr);
+        });
+    } else {
+        workerTbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">-</td></tr>`;
+    }
+
+    // Switch to print view tab
+    window.switchTab("work-permit-print");
+}
+
+// Initialize Work Permit Event Listeners
+document.addEventListener("DOMContentLoaded", () => {
+    // Buttons in Work Permit Dashboard
+    const btnOpenCreate = document.getElementById("btn-open-create-wp");
+    if (btnOpenCreate) {
+        btnOpenCreate.addEventListener("click", openCreateWorkPermitModal);
+    }
+
+    const searchInput = document.getElementById("wp-search-input");
+    if (searchInput) {
+        searchInput.addEventListener("input", (e) => {
+            renderWorkPermitsTable(e.target.value);
+        });
+    }
+
+    // Modal Close Buttons
+    const btnClose1 = document.getElementById("btn-close-wp-modal");
+    const btnClose2 = document.getElementById("btn-close-wp-modal-2");
+    const modalForm = document.getElementById("modal-work-permit-form");
+
+    if (btnClose1 && modalForm) {
+        btnClose1.addEventListener("click", () => { modalForm.style.display = "none"; });
+    }
+    if (btnClose2 && modalForm) {
+        btnClose2.addEventListener("click", () => { modalForm.style.display = "none"; });
+    }
+
+    // Dynamic Row Adders in Form
+    const btnAddSup = document.getElementById("btn-add-wp-supervisor");
+    if (btnAddSup) {
+        btnAddSup.addEventListener("click", () => { addSupervisorRow("", "", ""); });
+    }
+
+    const btnAddWorker = document.getElementById("btn-add-wp-worker");
+    if (btnAddWorker) {
+        btnAddWorker.addEventListener("click", () => { addWorkerRow("", "", "", ""); });
+    }
+
+    const btnImportTeam = document.getElementById("btn-import-team-to-workers");
+    if (btnImportTeam) {
+        btnImportTeam.addEventListener("click", importTeamToWorkers);
+    }
+
+    // Scope Radio Toggle Handlers
+    document.querySelectorAll("input[name='wp-safety-scope']").forEach(r => {
+        r.addEventListener("change", (e) => {
+            const otherInput = document.getElementById("wp-safety-scope-other");
+            if (otherInput) {
+                otherInput.style.display = (e.target.value === "อื่นๆ") ? "inline-block" : "none";
+                if (e.target.value === "อื่นๆ") otherInput.focus();
+            }
+        });
+    });
+
+    document.querySelectorAll("input[name='wp-control-scope']").forEach(r => {
+        r.addEventListener("change", (e) => {
+            const otherInput = document.getElementById("wp-control-scope-other");
+            if (otherInput) {
+                otherInput.style.display = (e.target.value === "อื่นๆ") ? "inline-block" : "none";
+                if (e.target.value === "อื่นๆ") otherInput.focus();
+            }
+        });
+    });
+
+    // Form Submit
+    const formWp = document.getElementById("form-work-permit");
+    if (formWp) {
+        formWp.addEventListener("submit", (e) => {
+            e.preventDefault();
+
+            const editId = document.getElementById("wp-edit-id").value;
+            const docNumber = document.getElementById("wp-input-doc-number").value.trim();
+            const docDate = document.getElementById("wp-input-doc-date").value;
+            const serviceOrderNumber = document.getElementById("wp-input-service-order").value.trim();
+            const projectName = document.getElementById("wp-input-project-name").value.trim();
+            const companyName = document.getElementById("wp-input-company-name").value.trim();
+            const contactName = document.getElementById("wp-input-contact-name").value.trim();
+            const location = document.getElementById("wp-input-location").value.trim();
+            const startDate = document.getElementById("wp-input-start-date").value.trim();
+
+            const safetyScope = document.querySelector("input[name='wp-safety-scope']:checked")?.value || "ไม่ต้องมี จป.วิชาชีพ";
+            const safetyScopeOther = document.getElementById("wp-safety-scope-other")?.value.trim() || "";
+
+            const controlScope = document.querySelector("input[name='wp-control-scope']:checked")?.value || "หัวหน้าช่างเทคนิค";
+            const controlScopeOther = document.getElementById("wp-control-scope-other")?.value.trim() || "";
+
+            const engineerLevel = document.querySelector("input[name='wp-engineer-level']:checked")?.value || "";
+
+            // Collect Supervisors
+            const supervisors = [];
+            document.querySelectorAll("#wp-supervisors-container .wp-sup-row").forEach(row => {
+                const name = row.querySelector(".wp-sup-name")?.value.trim();
+                const phone = row.querySelector(".wp-sup-phone")?.value.trim();
+                const role = row.querySelector(".wp-sup-role")?.value.trim();
+                if (name) supervisors.push({ name, phone, role });
+            });
+
+            // Collect Workers
+            const workers = [];
+            document.querySelectorAll("#wp-workers-tbody tr").forEach((tr, idx) => {
+                const name = tr.querySelector(".wp-worker-name")?.value.trim();
+                const idCard = tr.querySelector(".wp-worker-idcard")?.value.trim();
+                const phone = tr.querySelector(".wp-worker-phone")?.value.trim();
+                const remark = tr.querySelector(".wp-worker-remark")?.value.trim();
+                if (name) workers.push({ seq: idx + 1, name, idCard, phone, remark });
+            });
+
+            if (supervisors.length === 0) {
+                alert("กรุณาระบุผู้ควบคุมงานอย่างน้อย 1 ท่าน");
+                return;
+            }
+
+            if (workers.length === 0) {
+                alert("กรุณาระบุรายชื่อผู้เข้าปฏิบัติงานอย่างน้อย 1 ท่าน");
+                return;
+            }
+
+            const wpItem = {
+                id: editId || `WP-${Date.now()}`,
+                docNumber,
+                docDate,
+                serviceOrderNumber,
+                projectName,
+                companyName,
+                contactName,
+                location,
+                startDate,
+                safetyScope,
+                safetyScopeOther,
+                controlScope,
+                controlScopeOther,
+                engineerLevel,
+                supervisors,
+                workers,
+                createdAt: editId ? (workPermitsList.find(w => w.id === editId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+            };
+
+            if (editId) {
+                const idx = workPermitsList.findIndex(w => w.id === editId);
+                if (idx !== -1) workPermitsList[idx] = wpItem;
+            } else {
+                workPermitsList.unshift(wpItem);
+            }
+
+            saveWorkPermitsToLocalStorage();
+            renderWorkPermitsTable();
+            modalForm.style.display = "none";
+            alert("บันทึกใบขออนุญาตเข้าทำงานสำเร็จ!");
+        });
+    }
+
+    // Print View Navigation Buttons
+    const btnBackFromPrint = document.getElementById("btn-back-from-wp-print");
+    if (btnBackFromPrint) {
+        btnBackFromPrint.addEventListener("click", () => {
+            window.switchTab("work-permit");
+        });
+    }
+
+    const btnEditCurrentWp = document.getElementById("btn-edit-current-wp");
+    if (btnEditCurrentWp) {
+        btnEditCurrentWp.addEventListener("click", () => {
+            if (currentViewingWorkPermitId) {
+                openEditWorkPermitModal(currentViewingWorkPermitId);
+            }
+        });
+    }
+
+    const btnTriggerPrintWp = document.getElementById("btn-trigger-print-wp");
+    if (btnTriggerPrintWp) {
+        btnTriggerPrintWp.addEventListener("click", () => {
+            window.print();
+        });
+    }
+
+    // Initial render
+    loadWorkPermitsFromLocalStorage();
+});
+
+// Export globally for inline onclicks
+window.renderWorkPermitsTable = renderWorkPermitsTable;
+window.openCreateWorkPermitModal = openCreateWorkPermitModal;
+window.openEditWorkPermitModal = openEditWorkPermitModal;
+window.deleteWorkPermit = deleteWorkPermit;
+window.viewWorkPermitPrint = viewWorkPermitPrint;
+window.importTeamToWorkers = importTeamToWorkers;
+

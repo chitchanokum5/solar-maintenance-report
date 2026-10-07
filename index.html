@@ -111,6 +111,10 @@
                     <i data-lucide="history"></i>
                     <span>ประวัติรายงาน</span>
                 </button>
+                <button class="nav-item" data-tab="work-permit">
+                    <i data-lucide="file-check"></i>
+                    <span>ใบขอเข้าทำงาน</span>
+                </button>
                 <button class="nav-item" data-tab="team">
                     <i data-lucide="users"></i>
                     <span>รายชื่อทีมงาน O&M</span>
@@ -162,6 +166,7 @@
                         <button class="top-nav-item active" data-tab="dashboard"><i data-lucide="layout-grid"></i> <span>แดชบอร์ด</span></button>
                         <button class="top-nav-item" data-tab="new-report"><i data-lucide="file-plus"></i> <span>สร้างรายงานใหม่</span></button>
                         <button class="top-nav-item" data-tab="history"><i data-lucide="history"></i> <span>ประวัติรายงาน</span></button>
+                        <button class="top-nav-item" data-tab="work-permit"><i data-lucide="file-check"></i> <span>ขอเข้าหน้างาน</span></button>
                         <button class="top-nav-item" data-tab="team"><i data-lucide="users"></i> <span>ทีมงาน O&M</span></button>
                         <button class="top-nav-item" data-tab="sites"><i data-lucide="map-pin"></i> <span>รายชื่อไซต์งาน</span></button>
                         <button class="top-nav-item" data-tab="calendar"><i data-lucide="calendar"></i> <span>ปฏิทินการเข้าตรวจ</span></button>
@@ -817,6 +822,418 @@
                             <!-- Dynamic list of plans for selected month -->
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <!-- Work Permit Tab (ใบขออนุญาตเข้าทำงาน) -->
+            <section id="tab-work-permit" class="tab-content">
+                <!-- KPI Stats Cards -->
+                <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div class="kpi-card" style="border-left: 4px solid var(--primary-solar);">
+                        <div class="kpi-icon" style="background: rgba(251, 191, 36, 0.15); color: var(--primary-solar);">
+                            <i data-lucide="file-check"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">ใบขอเข้างานทั้งหมด</span>
+                            <h3 class="kpi-value" id="wp-stat-total">0</h3>
+                            <span class="kpi-sub">เอกสารในระบบ</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 4px solid #3b82f6;">
+                        <div class="kpi-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;">
+                            <i data-lucide="building-2"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">โครงการ / ลูกค้า</span>
+                            <h3 class="kpi-value" id="wp-stat-projects">0</h3>
+                            <span class="kpi-sub">ไซต์งานที่มีการขออนุญาต</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 4px solid #10b981;">
+                        <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+                            <i data-lucide="users"></i>
+                        </div>
+                        <div class="kpi-info">
+                            <span class="kpi-label">ช่างผู้ปฏิบัติงาน</span>
+                            <h3 class="kpi-value" id="wp-stat-workers">0</h3>
+                            <span class="kpi-sub">รวมบุคลากรที่เข้าปฏิบัติงาน</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls & Search Bar -->
+                <div class="history-controls" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;">
+                    <div class="search-box" style="flex: 1; min-width: 280px; margin: 0;">
+                        <i data-lucide="search"></i>
+                        <input type="text" id="wp-search-input" placeholder="ค้นหาตามเลขที่เอกสาร, โครงการ, บริษัท, หรือผู้ควบคุมงาน...">
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button class="btn btn-primary" id="btn-open-create-wp" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <i data-lucide="file-plus-2"></i>
+                            <span>+ สร้างใบขอเข้าทำงานใหม่</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Work Permits Table Container -->
+                <div class="table-container data-card" style="padding: 0; overflow-x: auto;">
+                    <table class="report-table" style="width: 100%; min-width: 850px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 140px;">เลขที่เอกสาร</th>
+                                <th style="width: 110px;">วันที่ทำเอกสาร</th>
+                                <th>โครงการ / บริษัทลูกค้า</th>
+                                <th>สถานที่</th>
+                                <th style="width: 130px;">วันดำเนินการ</th>
+                                <th style="width: 140px;">ผู้ควบคุมงาน</th>
+                                <th style="width: 90px; text-align: center;">จำนวนช่าง</th>
+                                <th style="width: 130px; text-align: center;">การจัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="work-permits-table-body">
+                            <!-- JS dynamically loads rows here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Create / Edit Work Permit Modal -->
+                <div class="modal" id="modal-work-permit-form" style="display: none; align-items: center; justify-content: center; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; padding: 1rem; overflow-y: auto;">
+                    <div class="modal-card" style="max-width: 900px; width: 95%; max-height: 90vh; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 1.75rem; box-shadow: var(--shadow-xl);">
+                        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px;">
+                            <h3 style="margin: 0; font-size: 1.2rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="file-check" style="color: var(--primary-solar); width: 22px; height: 22px;"></i>
+                                <span id="modal-wp-title">สร้างใบขออนุญาตเข้าทำงาน (Work Permit)</span>
+                            </h3>
+                            <button type="button" class="modal-close-btn" id="btn-close-wp-modal" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem; line-height: 1;">&times;</button>
+                        </div>
+                        <form id="form-work-permit">
+                            <input type="hidden" id="wp-edit-id" value="">
+                            
+                            <!-- Header Info -->
+                            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                                    <strong style="color: var(--primary-solar); font-size: 0.95rem;">บริษัท เคเคอี จำกัด (สำนักงานใหญ่)</strong>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted);">TEL : 080-8889562</span>
+                                </div>
+                                <div class="form-row" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <div class="form-group" style="flex: 1; min-width: 200px;">
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">เลขที่เอกสาร <span style="color: red;">*</span></label>
+                                        <input type="text" id="wp-input-doc-number" required placeholder="เช่น O&M0041/2568" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                    </div>
+                                    <div class="form-group" style="flex: 1; min-width: 200px;">
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">วันที่ทำเอกสาร <span style="color: red;">*</span></label>
+                                        <input type="date" id="wp-input-doc-date" required style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                    </div>
+                                    <div class="form-group" style="flex: 1; min-width: 200px;">
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">ใบแจ้งงานบริการเลขที่</label>
+                                        <input type="text" id="wp-input-service-order" placeholder="เช่น SR-20261007-001 (ถ้ามี)" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Project & Client Info -->
+                            <div style="margin-bottom: 1.25rem;">
+                                <h4 style="font-size: 0.95rem; color: var(--text-primary); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                                    <i data-lucide="building-2" style="width: 18px; height: 18px; color: #3b82f6;"></i>
+                                    <span>ข้อมูลโครงการและสถานที่</span>
+                                </h4>
+                                
+                                <div class="form-group" style="margin-bottom: 10px;">
+                                    <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">เลือกจากฐานข้อมูลไซต์งานระบบ (Auto-fill ช่วยกรอกเร็ว):</label>
+                                    <select id="wp-select-master-site" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                        <option value="">-- พิมพ์เอง หรือเลือกไซต์งานเพื่อดึงข้อมูลอัตโนมัติ --</option>
+                                    </select>
+                                </div>
+
+                                <div class="form-row" style="display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;">
+                                    <div class="form-group" style="flex: 1.2; min-width: 240px;">
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">โครงการ (Project Name) <span style="color: red;">*</span></label>
+                                        <input type="text" id="wp-input-project-name" required placeholder="เช่น FAST Factory 1 หรือ Brose Project Solar Rooftop" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                    </div>
+                                    <div class="form-group" style="flex: 1.2; min-width: 240px;">
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">ชื่อบริษัท / ลูกค้า (Company Name) <span style="color: red;">*</span></label>
+                                        <input type="text" id="wp-input-company-name" required placeholder="เช่น ฟูรูกาวา ออร์โตโมทีฟ ซีสเต็มส์ หรือ Brose (Thailand)" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                    </div>
+                                </div>
+
+                                <div class="form-row" style="display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;">
+                                    <div class="form-group" style="flex: 2; min-width: 280px;">
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">สถานที่ (Location) <span style="color: red;">*</span></label>
+                                        <input type="text" id="wp-input-location" required placeholder="เช่น นิคมอุตสาหกรรมปิ่นทอง 1 ต.หนองขาม อ.ศรีราชา จ.ชลบุรี" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                    </div>
+                                    <div class="form-group" style="flex: 1; min-width: 180px;">
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">ชื่อผู้ติดต่อ (Contact Name)</label>
+                                        <input type="text" id="wp-input-contact-name" placeholder="ชื่อเจ้าหน้าที่ลูกค้า" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                    </div>
+                                    <div class="form-group" style="flex: 1.2; min-width: 200px;">
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">วันดำเนินการ (Start Date) <span style="color: red;">*</span></label>
+                                        <input type="text" id="wp-input-start-date" required placeholder="เช่น 2569-10-09 หรือ 10/10/2569 - 11/10/2569" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Safety & Control Scope -->
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+                                <h4 style="font-size: 0.95rem; color: var(--text-primary); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                                    <i data-lucide="shield-check" style="width: 18px; height: 18px; color: #10b981;"></i>
+                                    <span>ขอบเขตความปลอดภัยและการควบคุม</span>
+                                </h4>
+
+                                <!-- Scope 1: Safety Scope -->
+                                <div style="margin-bottom: 12px;">
+                                    <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">1. ขอบเขตความปลอดภัย:</label>
+                                    <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.85rem;">
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-safety-scope" value="มี จป.วิชาชีพ"> มี จป.วิชาชีพ
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-safety-scope" value="ไม่ต้องมี จป.วิชาชีพ" checked> ไม่ต้องมี จป.วิชาชีพ
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-safety-scope" value="จป. หัวหน้างาน"> จป. หัวหน้างาน
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-safety-scope" value="อื่นๆ"> อื่นๆ
+                                        </label>
+                                        <input type="text" id="wp-safety-scope-other" placeholder="ระบุเพิ่มเติม..." style="padding: 0.3rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.8rem; width: 140px; display: none;">
+                                    </div>
+                                </div>
+
+                                <!-- Scope 2: Control Scope -->
+                                <div style="margin-bottom: 12px;">
+                                    <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">2. ขอบเขตการควบคุม:</label>
+                                    <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.85rem;">
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-control-scope" value="มี วิศวกร"> มี วิศวกร
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-control-scope" value="ไม่ต้องมี วิศวกร"> ไม่ต้องมี วิศวกร
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-control-scope" value="หัวหน้าช่างเทคนิค" checked> หัวหน้าช่างเทคนิค
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-control-scope" value="อื่นๆ"> อื่นๆ
+                                        </label>
+                                        <input type="text" id="wp-control-scope-other" placeholder="ระบุเพิ่มเติม..." style="padding: 0.3rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.8rem; width: 140px; display: none;">
+                                    </div>
+                                </div>
+
+                                <!-- Scope 3: Engineer Level -->
+                                <div>
+                                    <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">3. หากต้องมีวิศวกร กว (ควบคุม):</label>
+                                    <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.85rem;">
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-engineer-level" value="" checked> ไม่ระบุ / ไม่จำเป็น
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-engineer-level" value="ภาคี"> ภาคี
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-engineer-level" value="สามัญ"> สามัญ
+                                        </label>
+                                        <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="wp-engineer-level" value="อื่นๆ"> อื่นๆ
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Supervisor Section -->
+                            <div style="margin-bottom: 1.25rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <h4 style="font-size: 0.95rem; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 6px;">
+                                        <i data-lucide="user-check" style="width: 18px; height: 18px; color: var(--primary-solar);"></i>
+                                        <span>ผู้ควบคุมงาน</span>
+                                    </h4>
+                                    <button type="button" class="btn btn-outline btn-sm" id="btn-add-wp-supervisor" style="font-size: 0.78rem; padding: 4px 10px;">
+                                        + เพิ่มผู้ควบคุมงาน
+                                    </button>
+                                </div>
+                                <div id="wp-supervisors-container" style="display: flex; flex-direction: column; gap: 8px;">
+                                    <!-- Dynamic Supervisor Rows -->
+                                </div>
+                            </div>
+
+                            <!-- Workers List Section -->
+                            <div style="margin-bottom: 1.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                                    <h4 style="font-size: 0.95rem; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 6px;">
+                                        <i data-lucide="users" style="width: 18px; height: 18px; color: #10b981;"></i>
+                                        <span>รายชื่อผู้เข้าปฏิบัติงาน</span>
+                                    </h4>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="button" class="btn btn-outline btn-sm" id="btn-import-team-to-workers" style="font-size: 0.78rem; padding: 4px 10px; color: #10b981; border-color: rgba(16,185,129,0.3);">
+                                            <i data-lucide="user-plus" style="width: 14px; height: 14px;"></i>
+                                            <span>ดึงจากทีมงาน O&M</span>
+                                        </button>
+                                        <button type="button" class="btn btn-outline btn-sm" id="btn-add-wp-worker" style="font-size: 0.78rem; padding: 4px 10px;">
+                                            + เพิ่มรายชื่อช่าง
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div style="overflow-x: auto; border: 1px solid var(--border-color); border-radius: var(--border-radius-md);">
+                                    <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                                        <thead>
+                                            <tr style="background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--border-color);">
+                                                <th style="padding: 8px; text-align: center; width: 45px;">ลำดับ</th>
+                                                <th style="padding: 8px; text-align: left;">ชื่อ-สกุล <span style="color: red;">*</span></th>
+                                                <th style="padding: 8px; text-align: left; width: 170px;">เลขบัตรประชาชน (13 หลัก)</th>
+                                                <th style="padding: 8px; text-align: left; width: 140px;">เบอร์โทร</th>
+                                                <th style="padding: 8px; text-align: left; width: 130px;">หมายเหตุ</th>
+                                                <th style="padding: 8px; text-align: center; width: 45px;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="wp-workers-tbody">
+                                            <!-- Dynamic Worker Rows -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Modal Footer Buttons -->
+                            <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 14px;">
+                                <button type="button" class="btn btn-outline" id="btn-close-wp-modal-2">ยกเลิก</button>
+                                <button type="submit" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px;">
+                                    <i data-lucide="save" style="width: 16px; height: 16px;"></i>
+                                    <span>บันทึกใบขอเข้าทำงาน</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Official Work Permit Printable A4 View -->
+            <section id="tab-work-permit-print" class="tab-content report-print-view-mode">
+                <div class="print-actions-header no-print">
+                    <button class="btn btn-outline" id="btn-back-from-wp-print">
+                        <i data-lucide="arrow-left"></i>
+                        <span>กลับไปรายการ</span>
+                    </button>
+                    <div style="display: flex; align-items: center; gap: 10px; margin-left: auto;">
+                        <button class="btn btn-outline" id="btn-edit-current-wp">
+                            <i data-lucide="edit-3"></i>
+                            <span>แก้ไขเอกสารนี้</span>
+                        </button>
+                        <button class="btn btn-primary" id="btn-trigger-print-wp" style="background: var(--status-success); border-color: var(--status-success); color: #fff;">
+                            <i data-lucide="printer"></i>
+                            <span>พิมพ์เอกสาร / ดาวน์โหลด PDF</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Printable Paper Sheet (A4 Styled Paper) -->
+                <div class="report-paper wp-paper" id="work-permit-printable-area">
+                    <!-- Letterhead / Company Header -->
+                    <div class="wp-print-header">
+                        <div class="wp-print-logo-col">
+                            <img src="kke-logo.png" alt="KKE Logo" class="wp-print-logo">
+                            <div class="wp-print-company-text">
+                                <div class="wp-print-company-name">บริษัท เคเคอี จำกัด</div>
+                                <div class="wp-print-company-addr">213 ม.13 ถนนเลี่ยงเมือง ตำบลบ้านเป็ด อำเภอเมือง จังหวัดขอนแก่น 40000</div>
+                                <div class="wp-print-company-tel">TEL : 080-8889562</div>
+                            </div>
+                        </div>
+                        <div class="wp-print-meta-col">
+                            <div class="wp-meta-line"><strong>เลขที่ :</strong> <span id="print-wp-doc-number">-</span></div>
+                            <div class="wp-meta-line"><strong>วันที่ :</strong> <span id="print-wp-doc-date">-</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Title -->
+                    <div class="wp-print-main-title">ใบขออนุญาตเข้าทำงาน</div>
+
+                    <!-- Info Table -->
+                    <table class="wp-print-table wp-info-table">
+                        <tr>
+                            <td class="wp-label-cell" style="width: 25%;">โครงการ (Project Name)</td>
+                            <td class="wp-val-cell" style="width: 40%;" id="print-wp-project-name">-</td>
+                            <td class="wp-label-cell" style="width: 15%;">ชื่อผู้ติดต่อ</td>
+                            <td class="wp-val-cell" style="width: 20%;" id="print-wp-contact-name">-</td>
+                        </tr>
+                        <tr>
+                            <td class="wp-label-cell">ชื่อบริษัท (Company Name)</td>
+                            <td class="wp-val-cell" id="print-wp-company-name">-</td>
+                            <td class="wp-label-cell">สถานที่ (Location)</td>
+                            <td class="wp-val-cell" id="print-wp-location">-</td>
+                        </tr>
+                        <tr>
+                            <td class="wp-label-cell">ใบแจ้งงานบริการเลขที่</td>
+                            <td class="wp-val-cell" id="print-wp-service-order">-</td>
+                            <td class="wp-label-cell">วันดำเนินการ</td>
+                            <td class="wp-val-cell" id="print-wp-start-date">-</td>
+                        </tr>
+                    </table>
+
+                    <!-- Scopes Table -->
+                    <table class="wp-print-table wp-scope-table" style="margin-top: 8px;">
+                        <tr>
+                            <td class="wp-label-cell" style="width: 25%;">ขอบเขตความปลอดภัย</td>
+                            <td class="wp-val-cell" id="print-wp-safety-scope">-</td>
+                        </tr>
+                        <tr>
+                            <td class="wp-label-cell">ขอบเขตการควบคุม</td>
+                            <td class="wp-val-cell" id="print-wp-control-scope">-</td>
+                        </tr>
+                        <tr id="print-wp-eng-row">
+                            <td class="wp-label-cell">หากต้องมีวิศวกร กว (ควบคุม)</td>
+                            <td class="wp-val-cell" id="print-wp-engineer-level">-</td>
+                        </tr>
+                    </table>
+
+                    <!-- Supervisors Table -->
+                    <div class="wp-section-header">ผู้ควบคุมงาน</div>
+                    <table class="wp-print-table wp-supervisors-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%; text-align: center;">ลำดับ</th>
+                                <th style="width: 40%;">ชื่อ - สกุล</th>
+                                <th style="width: 25%;">เบอร์โทรศัพท์</th>
+                                <th style="width: 25%;">ตำแหน่ง</th>
+                            </tr>
+                        </thead>
+                        <tbody id="print-wp-supervisors-tbody">
+                            <!-- Dynamic supervisor rows -->
+                        </tbody>
+                    </table>
+
+                    <!-- Workers List Table -->
+                    <div class="wp-section-header">รายชื่อผู้เข้าปฏิบัติงาน</div>
+                    <table class="wp-print-table wp-workers-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 8%; text-align: center;">ลำดับ</th>
+                                <th style="width: 35%;">ชื่อ-สกุล</th>
+                                <th style="width: 27%;">เลขบัตรประชาชน</th>
+                                <th style="width: 18%;">เบอร์โทร</th>
+                                <th style="width: 12%;">หมายเหตุ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="print-wp-workers-tbody">
+                            <!-- Dynamic worker rows -->
+                        </tbody>
+                    </table>
+
+                    <!-- Sign-off Section -->
+                    <div class="wp-section-header" style="margin-top: 10px;">ส่วนการลงนามและอนุมัติ</div>
+                    <table class="wp-print-table wp-sign-table">
+                        <tr>
+                            <td style="width: 50%; padding: 18px 12px; text-align: center; vertical-align: bottom;">
+                                <div style="margin-bottom: 25px;">ลงชื่อ ............................................................................ (ผู้ขออนุญาต)</div>
+                                <div style="margin-bottom: 8px;">( <span id="print-wp-signer-kke">............................................................................</span> )</div>
+                                <div style="margin-bottom: 8px;">ตำแหน่ง: <span id="print-wp-signer-role">Senior Foreman / ผู้ควบคุมงาน</span></div>
+                                <div>วันที่ .........../.........../................</div>
+                            </td>
+                            <td style="width: 50%; padding: 18px 12px; text-align: center; vertical-align: bottom;">
+                                <div style="margin-bottom: 25px;">ลงชื่อ ............................................................................ (ลูกค้า / ผู้อนุมัติ)</div>
+                                <div style="margin-bottom: 8px;">( ............................................................................ )</div>
+                                <div style="margin-bottom: 8px;">ตำแหน่ง: ............................................................................</div>
+                                <div>วันที่ .........../.........../................</div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </section>
 
