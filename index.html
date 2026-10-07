@@ -916,18 +916,54 @@
                                     <span style="font-size: 0.8rem; color: var(--text-muted);">TEL : 080-8889562</span>
                                 </div>
                                 <div class="form-row" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                    <div class="form-group" style="flex: 1; min-width: 200px;">
+                                    <div class="form-group" style="flex: 1; min-width: 170px;">
                                         <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">เลขที่เอกสาร <span style="color: red;">*</span></label>
                                         <input type="text" id="wp-input-doc-number" required placeholder="เช่น O&M0041/2568" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
                                     </div>
-                                    <div class="form-group" style="flex: 1; min-width: 200px;">
+                                    <div class="form-group" style="flex: 1; min-width: 170px;">
                                         <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">วันที่ทำเอกสาร <span style="color: red;">*</span></label>
                                         <input type="date" id="wp-input-doc-date" required style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
                                     </div>
-                                    <div class="form-group" style="flex: 1; min-width: 200px;">
-                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">ใบแจ้งงานบริการเลขที่</label>
-                                        <input type="text" id="wp-input-service-order" placeholder="เช่น SR-20261007-001 (ถ้ามี)" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                    <div class="form-group" style="flex: 1.6; min-width: 250px;">
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">ชื่องาน / วัตถุประสงค์ (Job Title) <span style="color: red;">*</span></label>
+                                        <input type="text" id="wp-input-job-title" required placeholder="เช่น ตรวจเช็คบำรุงรักษาประจำปี (PM) หรือ ล้างแผงโซล่าเซลล์" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
                                     </div>
+                                </div>
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px;">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted);">เลือกชื่องานด่วน:</span>
+                                    <button type="button" class="btn btn-outline btn-sm wp-job-preset-btn" data-title="ตรวจเช็คบำรุงรักษาเชิงป้องกันประจำปี (PM)" style="padding: 2px 8px; font-size: 0.72rem;">บำรุงรักษา PM</button>
+                                    <button type="button" class="btn btn-outline btn-sm wp-job-preset-btn" data-title="ล้างทำความสะอาดแผงโซล่าเซลล์ (Solar Panel Cleaning)" style="padding: 2px 8px; font-size: 0.72rem;">ล้างทำความสะอาดแผง</button>
+                                    <button type="button" class="btn btn-outline btn-sm wp-job-preset-btn" data-title="ตรวจสอบและแก้ไขปัญหาความผิดปกติ (CM)" style="padding: 2px 8px; font-size: 0.72rem;">ตรวจซ่อม CM</button>
+                                    <button type="button" class="btn btn-outline btn-sm wp-job-preset-btn" data-title="ตรวจวัดประสิทธิภาพและเทอร์โมสแกน (Thermal Scan)" style="padding: 2px 8px; font-size: 0.72rem;">เทอร์โมสแกน</button>
+                                </div>
+                            </div>
+
+                            <!-- Work Nature / Types (ประเภทงาน) -->
+                            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); padding: 1rem; margin-bottom: 1.25rem;">
+                                <label style="display: block; font-size: 0.88rem; font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">
+                                    <i data-lucide="layers" style="width: 16px; height: 16px; color: var(--primary-solar); vertical-align: middle; margin-right: 4px;"></i>
+                                    ประเภทงาน (เลือกได้หลายประเภท) <span style="color: red;">*</span>
+                                </label>
+                                <div id="wp-work-types-grid" style="display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.85rem;">
+                                    <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(255,255,255,0.04); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <input type="checkbox" name="wp-work-type" value="งานทั่วไป"> งานทั่วไป
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(255,255,255,0.04); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <input type="checkbox" name="wp-work-type" value="งานบนที่สูง" checked> งานบนที่สูง
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(255,255,255,0.04); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <input type="checkbox" name="wp-work-type" value="งานเกี่ยวกับไฟฟ้า" checked> งานเกี่ยวกับไฟฟ้า
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(255,255,255,0.04); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <input type="checkbox" name="wp-work-type" value="งานในที่อับอากาศ"> งานในที่อับอากาศ
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(255,255,255,0.04); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <input type="checkbox" name="wp-work-type" value="งานประกายไฟ/ความร้อน"> งานประกายไฟ/ความร้อน
+                                    </label>
+                                    <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; background: rgba(255,255,255,0.04); padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <input type="checkbox" name="wp-work-type" value="อื่นๆ" id="wp-work-type-other-checkbox"> อื่นๆ
+                                    </label>
+                                    <input type="text" id="wp-work-type-other" placeholder="ระบุประเภทงานอื่นๆ..." style="padding: 0.35rem 0.65rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.8rem; width: 170px; display: none;">
                                 </div>
                             </div>
 
@@ -958,16 +994,42 @@
 
                                 <div class="form-row" style="display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;">
                                     <div class="form-group" style="flex: 2; min-width: 280px;">
-                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">สถานที่ (Location) <span style="color: red;">*</span></label>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                            <label style="font-size: 0.82rem; font-weight: 600;">สถานที่ (Location) <span style="color: red;">*</span></label>
+                                            <button type="button" class="btn btn-outline btn-sm" id="btn-open-gmaps-picker" style="font-size: 0.75rem; padding: 2px 8px; color: #3b82f6; border-color: rgba(59,130,246,0.3); display: inline-flex; align-items: center; gap: 4px;">
+                                                <i data-lucide="map-pin" style="width: 13px; height: 13px;"></i>
+                                                <span>เลือก / ปักหมุดบน Google Maps</span>
+                                            </button>
+                                        </div>
                                         <input type="text" id="wp-input-location" required placeholder="เช่น นิคมอุตสาหกรรมปิ่นทอง 1 ต.หนองขาม อ.ศรีราชา จ.ชลบุรี" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                        <input type="hidden" id="wp-input-maps-url" value="">
+                                        <div id="wp-maps-url-badge" style="display: none; margin-top: 5px; font-size: 0.75rem; color: #10b981; align-items: center; gap: 4px;">
+                                            <i data-lucide="check-circle" style="width: 13px; height: 13px;"></i>
+                                            <span>มีพิกัด Google Maps: </span>
+                                            <a id="wp-maps-preview-link" href="#" target="_blank" style="color: #3b82f6; text-decoration: underline;">เปิดดูหมุด</a>
+                                            <button type="button" id="btn-clear-maps-url" style="background: none; border: none; color: var(--status-danger); cursor: pointer; margin-left: 6px;">[ลบลิงก์]</button>
+                                        </div>
                                     </div>
                                     <div class="form-group" style="flex: 1; min-width: 180px;">
                                         <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">ชื่อผู้ติดต่อ (Contact Name)</label>
                                         <input type="text" id="wp-input-contact-name" placeholder="ชื่อเจ้าหน้าที่ลูกค้า" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
                                     </div>
-                                    <div class="form-group" style="flex: 1.2; min-width: 200px;">
+                                </div>
+
+                                <div class="form-row" style="display: flex; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;">
+                                    <div class="form-group" style="flex: 1.2; min-width: 220px;">
                                         <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">วันดำเนินการ (Start Date) <span style="color: red;">*</span></label>
                                         <input type="text" id="wp-input-start-date" required placeholder="เช่น 2569-10-09 หรือ 10/10/2569 - 11/10/2569" style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                    </div>
+                                    <div class="form-group" style="flex: 1.2; min-width: 220px;">
+                                        <label style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 4px;">เวลาดำเนินการ (Work Hours) <span style="color: red;">*</span></label>
+                                        <input type="text" id="wp-input-work-time" required value="08:00 - 17:00 น." placeholder="เช่น 08:00 - 17:00 น." style="width: 100%; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary);">
+                                        <div style="display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap;">
+                                            <button type="button" class="btn btn-outline btn-sm wp-time-preset-btn" data-time="08:00 - 17:00 น." style="padding: 1px 6px; font-size: 0.7rem;">08:00 - 17:00</button>
+                                            <button type="button" class="btn btn-outline btn-sm wp-time-preset-btn" data-time="08:30 - 17:30 น." style="padding: 1px 6px; font-size: 0.7rem;">08:30 - 17:30</button>
+                                            <button type="button" class="btn btn-outline btn-sm wp-time-preset-btn" data-time="09:00 - 18:00 น." style="padding: 1px 6px; font-size: 0.7rem;">09:00 - 18:00</button>
+                                            <button type="button" class="btn btn-outline btn-sm wp-time-preset-btn" data-time="24 ชั่วโมง (เข้างานกะ)" style="padding: 1px 6px; font-size: 0.7rem;">24 ชม.</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1103,6 +1165,50 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- Google Maps Picker Modal -->
+                <div class="modal" id="modal-gmaps-picker" style="display: none; align-items: center; justify-content: center; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 10000; padding: 1rem;">
+                    <div class="modal-card" style="max-width: 750px; width: 95%; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 1.5rem; box-shadow: var(--shadow-xl);">
+                        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 14px;">
+                            <h3 style="margin: 0; font-size: 1.15rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                <i data-lucide="map-pin" style="color: #ef4444; width: 20px; height: 20px;"></i>
+                                <span>ค้นหาและเลือกตำแหน่งบน Google Maps</span>
+                            </h3>
+                            <button type="button" class="modal-close-btn" id="btn-close-gmaps-modal" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.4rem; line-height: 1;">&times;</button>
+                        </div>
+
+                        <div style="margin-bottom: 12px;">
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <input type="text" id="gmaps-search-input" placeholder="พิมพ์ชื่อโรงงาน, นิคมอุตสาหกรรม, หรือที่อยู่..." style="flex: 1; padding: 0.55rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.85rem;">
+                                <button type="button" class="btn btn-primary" id="btn-search-gmaps" style="padding: 0.55rem 1rem;">
+                                    <i data-lucide="search" style="width: 15px; height: 15px;"></i>
+                                    <span>ค้นหา</span>
+                                </button>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted);">
+                                <span>หรือวางลิงก์ที่แชร์จาก Google Maps:</span>
+                                <a id="btn-open-real-gmaps" href="https://www.google.com/maps" target="_blank" style="color: #3b82f6; text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;">
+                                    <span>เปิด Google Maps หาหมุด</span>
+                                    <i data-lucide="external-link" style="width: 12px; height: 12px;"></i>
+                                </a>
+                            </div>
+                            <input type="text" id="gmaps-paste-link" placeholder="วางลิงก์ เช่น https://maps.app.goo.gl/... หรือ พิกัด ละติจูด,ลองจิจูด" style="width: 100%; margin-top: 6px; padding: 0.45rem 0.8rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
+                        </div>
+
+                        <!-- Maps iframe preview -->
+                        <div style="width: 100%; height: 300px; border-radius: var(--border-radius-md); overflow: hidden; border: 1px solid var(--border-color); margin-bottom: 14px; position: relative; background: #1e293b;">
+                            <iframe id="gmaps-preview-iframe" width="100%" height="100%" frameborder="0" style="border:0;" allowfullscreen loading="lazy" src="about:blank"></iframe>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                            <button type="button" class="btn btn-outline" id="btn-cancel-gmaps">ยกเลิก</button>
+                            <button type="button" class="btn btn-primary" id="btn-apply-gmaps" style="display: inline-flex; align-items: center; gap: 6px;">
+                                <i data-lucide="check" style="width: 16px; height: 16px;"></i>
+                                <span>ใช้ตำแหน่งนี้ในเอกสาร</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- Official Work Permit Printable A4 View -->
@@ -1148,22 +1254,28 @@
                     <!-- Info Table -->
                     <table class="wp-print-table wp-info-table">
                         <tr>
-                            <td class="wp-label-cell" style="width: 25%;">โครงการ (Project Name)</td>
-                            <td class="wp-val-cell" style="width: 40%;" id="print-wp-project-name">-</td>
-                            <td class="wp-label-cell" style="width: 15%;">ชื่อผู้ติดต่อ</td>
-                            <td class="wp-val-cell" style="width: 20%;" id="print-wp-contact-name">-</td>
+                            <td class="wp-label-cell" style="width: 22%;">โครงการ (Project Name)</td>
+                            <td class="wp-val-cell" style="width: 40%; font-weight: 700;" id="print-wp-project-name">-</td>
+                            <td class="wp-label-cell" style="width: 16%;">ชื่องาน / วัตถุประสงค์</td>
+                            <td class="wp-val-cell" style="width: 22%; font-weight: 600;" id="print-wp-job-title">-</td>
                         </tr>
                         <tr>
                             <td class="wp-label-cell">ชื่อบริษัท (Company Name)</td>
                             <td class="wp-val-cell" id="print-wp-company-name">-</td>
-                            <td class="wp-label-cell">สถานที่ (Location)</td>
-                            <td class="wp-val-cell" id="print-wp-location">-</td>
+                            <td class="wp-label-cell">ชื่อผู้ติดต่อ</td>
+                            <td class="wp-val-cell" id="print-wp-contact-name">-</td>
                         </tr>
                         <tr>
-                            <td class="wp-label-cell">ใบแจ้งงานบริการเลขที่</td>
-                            <td class="wp-val-cell" id="print-wp-service-order">-</td>
-                            <td class="wp-label-cell">วันดำเนินการ</td>
-                            <td class="wp-val-cell" id="print-wp-start-date">-</td>
+                            <td class="wp-label-cell">สถานที่ (Location)</td>
+                            <td class="wp-val-cell" colspan="3" id="print-wp-location">-</td>
+                        </tr>
+                        <tr>
+                            <td class="wp-label-cell">วันและเวลาดำเนินการ</td>
+                            <td class="wp-val-cell" colspan="3" id="print-wp-start-date">-</td>
+                        </tr>
+                        <tr>
+                            <td class="wp-label-cell">ประเภทงาน (Work Type)</td>
+                            <td class="wp-val-cell" colspan="3" id="print-wp-work-types">-</td>
                         </tr>
                     </table>
 

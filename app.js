@@ -4413,12 +4413,16 @@ const defaultWorkPermitsList = [
         id: "WP-20261007-001",
         docNumber: "O&M0041/2568",
         docDate: "2026-10-07",
-        serviceOrderNumber: "",
+        jobTitle: "ตรวจเช็คบำรุงรักษาเชิงป้องกันประจำปี (PM)",
+        workTypes: ["งานบนที่สูง", "งานเกี่ยวกับไฟฟ้า"],
+        workTypesOther: "",
         projectName: "FAST Factory 1",
         companyName: "ฟูรูกาวา ออร์โตโมทีฟ ซีสเต็มส์ (ประเทศไทย)",
         location: "Pinthong Industrial Estate 789/72 หมู่.1 ตำบล หนองขาม อำเภอศรีราชา ชลบุรี 20230",
+        mapsUrl: "https://www.google.com/maps/search/?api=1&query=Pinthong+Industrial+Estate+789%2F72+Nong+Kham+Sriracha+Chonburi",
         contactName: "",
         startDate: "2569-10-09",
+        workTime: "08:00 - 17:00 น.",
         safetyScope: "ไม่ต้องมี จป.วิชาชีพ",
         safetyScopeOther: "",
         controlScope: "หัวหน้าช่างเทคนิค",
@@ -4437,12 +4441,16 @@ const defaultWorkPermitsList = [
         id: "WP-20261007-002",
         docNumber: "O&M0042/2568",
         docDate: "2026-10-07",
-        serviceOrderNumber: "",
+        jobTitle: "ตรวจเช็คบำรุงรักษาเชิงป้องกันประจำปี (PM)",
+        workTypes: ["งานบนที่สูง", "งานเกี่ยวกับไฟฟ้า"],
+        workTypesOther: "",
         projectName: "Brose Project Solar Rooftop 249.60kWp",
         companyName: "Brose (Thailand) Co., Ltd.",
         location: "890/14, Moo 3, WHA Eastern Seaboard Industrial Estate 2 ตำบล เขาคันทรง Sriracha, ชลบุรี 20110",
+        mapsUrl: "https://www.google.com/maps/search/?api=1&query=Brose+Thailand+WHA+Eastern+Seaboard+2",
         contactName: "",
         startDate: "2569-10-09",
+        workTime: "08:00 - 17:00 น.",
         safetyScope: "ไม่ต้องมี จป.วิชาชีพ",
         safetyScopeOther: "",
         controlScope: "หัวหน้าช่างเทคนิค",
@@ -4461,12 +4469,16 @@ const defaultWorkPermitsList = [
         id: "WP-20261007-003",
         docNumber: "O&M0043/2568",
         docDate: "2026-10-07",
-        serviceOrderNumber: "",
+        jobTitle: "ตรวจเช็คบำรุงรักษาเชิงป้องกันและเทอร์โมสแกน",
+        workTypes: ["งานบนที่สูง", "งานเกี่ยวกับไฟฟ้า"],
+        workTypesOther: "",
         projectName: "RIKA JTW HEAT TREATMENT 1329.90kW",
         companyName: "RIKA JTW HEAT TREATMENT",
         location: "789/63 ตำบล หนองขาม อำเภอศรีราชา ชลบุรี 20230",
+        mapsUrl: "https://www.google.com/maps/search/?api=1&query=RIKA+JTW+HEAT+TREATMENT+Nong+Kham+Sriracha+Chonburi",
         contactName: "",
         startDate: "10/10/2569-11/10/2569",
+        workTime: "08:00 - 17:00 น.",
         safetyScope: "ไม่ต้องมี จป.วิชาชีพ",
         safetyScopeOther: "",
         controlScope: "หัวหน้าช่างเทคนิค",
@@ -4485,12 +4497,16 @@ const defaultWorkPermitsList = [
         id: "WP-20261007-004",
         docNumber: "O&M0044/2568",
         docDate: "2026-10-07",
-        serviceOrderNumber: "",
+        jobTitle: "ตรวจเช็คบำรุงรักษาเชิงป้องกันประจำปี (PM)",
+        workTypes: ["งานบนที่สูง", "งานเกี่ยวกับไฟฟ้า"],
+        workTypesOther: "",
         projectName: "A-PLA HIGHTECH",
         companyName: "บริษัท เอ-พลา ไฮเทค จำกัด สาขา2",
         location: "244 48 ตำบล บ่อวิน อำเภอศรีราชา ชลบุรี 20110",
+        mapsUrl: "https://www.google.com/maps/search/?api=1&query=A-PLA+HIGHTECH+Bowin+Sriracha+Chonburi",
         contactName: "",
         startDate: "2569-10-07",
+        workTime: "08:00 - 17:00 น.",
         safetyScope: "ไม่ต้องมี จป.วิชาชีพ",
         safetyScopeOther: "",
         controlScope: "หัวหน้าช่างเทคนิค",
@@ -4541,6 +4557,7 @@ function renderWorkPermitsTable(query = "") {
         (wp.docNumber && wp.docNumber.toLowerCase().includes(q)) ||
         (wp.projectName && wp.projectName.toLowerCase().includes(q)) ||
         (wp.companyName && wp.companyName.toLowerCase().includes(q)) ||
+        (wp.jobTitle && wp.jobTitle.toLowerCase().includes(q)) ||
         (wp.location && wp.location.toLowerCase().includes(q)) ||
         (wp.supervisors && wp.supervisors.some(s => s.name.toLowerCase().includes(q)))
     );
@@ -4584,6 +4601,9 @@ function renderWorkPermitsTable(query = "") {
             ? wp.supervisors.map(s => s.name).join(", ") 
             : "-";
         const workersCount = (wp.workers && wp.workers.length > 0) ? wp.workers.length : 0;
+        const workTypesBadges = (wp.workTypes && wp.workTypes.length > 0)
+            ? wp.workTypes.map(t => `<span style="display: inline-block; padding: 1px 6px; font-size: 0.7rem; border-radius: 4px; background: rgba(251, 191, 36, 0.12); color: var(--primary-solar); margin-right: 3px;">${t}</span>`).join("")
+            : "";
 
         tr.innerHTML = `
             <td style="font-weight: 600; color: var(--primary-solar);">
@@ -4595,12 +4615,18 @@ function renderWorkPermitsTable(query = "") {
             <td>
                 <div style="font-weight: 600; color: var(--text-primary);">${wp.projectName || "-"}</div>
                 <div style="font-size: 0.78rem; color: var(--text-muted);">${wp.companyName || ""}</div>
+                ${wp.jobTitle ? `<div style="font-size: 0.75rem; color: #3b82f6; margin-top: 2px;">📋 ${wp.jobTitle}</div>` : ""}
+                ${workTypesBadges ? `<div style="margin-top: 4px;">${workTypesBadges}</div>` : ""}
             </td>
-            <td style="font-size: 0.82rem; color: var(--text-secondary); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${wp.location || ''}">
-                ${wp.location || "-"}
+            <td style="font-size: 0.82rem; color: var(--text-secondary); max-width: 200px;">
+                <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${wp.location || ''}">
+                    ${wp.location || "-"}
+                </div>
+                ${wp.mapsUrl ? `<a href="${wp.mapsUrl}" target="_blank" style="font-size: 0.72rem; color: #0284c7; text-decoration: underline; display: inline-flex; align-items: center; gap: 2px; margin-top: 2px;">📍 Google Maps</a>` : ""}
             </td>
-            <td style="font-size: 0.85rem; color: #10b981; font-weight: 500;">
-                ${wp.startDate || "-"}
+            <td style="font-size: 0.82rem; color: #10b981; font-weight: 500;">
+                <div>${wp.startDate || "-"}</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">${wp.workTime || "08:00 - 17:00 น."}</div>
             </td>
             <td style="font-size: 0.82rem; color: var(--text-primary);">
                 ${supNames}
@@ -4639,7 +4665,6 @@ function addSupervisorRow(name = "", phone = "", role = "") {
     row.className = "wp-sup-row";
     row.style.cssText = "display: flex; gap: 8px; align-items: center; background: rgba(255,255,255,0.02); padding: 6px; border-radius: 6px; border: 1px solid var(--border-color);";
 
-    // Quick team selector options
     let teamOptions = `<option value="">-- เลือกจากทีมงาน --</option>`;
     if (typeof teamMembersList !== "undefined") {
         teamMembersList.forEach(m => {
@@ -4734,7 +4759,6 @@ function importTeamToWorkers() {
     const tbody = document.getElementById("wp-workers-tbody");
     if (!tbody) return;
 
-    // Check existing names to prevent duplicate imports
     const existingNames = Array.from(tbody.querySelectorAll(".wp-worker-name")).map(i => i.value.trim());
 
     let addedCount = 0;
@@ -4777,9 +4801,28 @@ function populateWpMasterSitesDropdown() {
         document.getElementById("wp-input-company-name").value = val;
         if (opt) {
             const loc = `${opt.dataset.district || ''} จ.${opt.dataset.province || ''}`.trim();
-            if (loc) document.getElementById("wp-input-location").value = loc;
+            if (loc) {
+                document.getElementById("wp-input-location").value = loc;
+                // Auto create Google Maps query URL
+                const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(val + ' ' + loc)}`;
+                document.getElementById("wp-input-maps-url").value = mapsUrl;
+                updateMapsUrlBadge(mapsUrl);
+            }
         }
     });
+}
+
+function updateMapsUrlBadge(url) {
+    const badge = document.getElementById("wp-maps-url-badge");
+    const previewLink = document.getElementById("wp-maps-preview-link");
+    if (!badge || !previewLink) return;
+
+    if (url) {
+        previewLink.href = url;
+        badge.style.display = "flex";
+    } else {
+        badge.style.display = "none";
+    }
 }
 
 // Open Create Modal
@@ -4792,20 +4835,31 @@ function openCreateWorkPermitModal() {
     document.getElementById("wp-edit-id").value = "";
     document.getElementById("modal-wp-title").innerText = "สร้างใบขออนุญาตเข้าทำงาน (Work Permit)";
 
-    // Auto-generate next document number
     const nextSeq = String(workPermitsList.length + 41).padStart(4, "0");
     const currentYear = new Date().getFullYear() + 543;
     document.getElementById("wp-input-doc-number").value = `O&M${nextSeq}/${currentYear}`;
 
-    // Today's date in YYYY-MM-DD
     const todayStr = new Date().toISOString().split("T")[0];
     document.getElementById("wp-input-doc-date").value = todayStr;
-    document.getElementById("wp-input-service-order").value = "";
+    document.getElementById("wp-input-job-title").value = "ตรวจเช็คบำรุงรักษาเชิงป้องกันประจำปี (PM)";
     document.getElementById("wp-input-project-name").value = "";
     document.getElementById("wp-input-company-name").value = "";
     document.getElementById("wp-input-contact-name").value = "";
     document.getElementById("wp-input-location").value = "";
+    document.getElementById("wp-input-maps-url").value = "";
+    updateMapsUrlBadge("");
     document.getElementById("wp-input-start-date").value = todayStr;
+    document.getElementById("wp-input-work-time").value = "08:00 - 17:00 น.";
+
+    // Work Types Checkboxes
+    document.querySelectorAll("input[name='wp-work-type']").forEach(cb => {
+        cb.checked = (cb.value === "งานบนที่สูง" || cb.value === "งานเกี่ยวกับไฟฟ้า");
+    });
+    const workTypeOtherInput = document.getElementById("wp-work-type-other");
+    if (workTypeOtherInput) {
+        workTypeOtherInput.style.display = "none";
+        workTypeOtherInput.value = "";
+    }
 
     // Reset radio scopes
     const safetyRadios = document.querySelectorAll("input[name='wp-safety-scope']");
@@ -4850,12 +4904,31 @@ function openEditWorkPermitModal(id) {
 
     document.getElementById("wp-input-doc-number").value = wp.docNumber || "";
     document.getElementById("wp-input-doc-date").value = wp.docDate || "";
-    document.getElementById("wp-input-service-order").value = wp.serviceOrderNumber || "";
+    document.getElementById("wp-input-job-title").value = wp.jobTitle || "ตรวจเช็คบำรุงรักษาเชิงป้องกันประจำปี (PM)";
     document.getElementById("wp-input-project-name").value = wp.projectName || "";
     document.getElementById("wp-input-company-name").value = wp.companyName || "";
     document.getElementById("wp-input-contact-name").value = wp.contactName || "";
     document.getElementById("wp-input-location").value = wp.location || "";
+    document.getElementById("wp-input-maps-url").value = wp.mapsUrl || "";
+    updateMapsUrlBadge(wp.mapsUrl || "");
     document.getElementById("wp-input-start-date").value = wp.startDate || "";
+    document.getElementById("wp-input-work-time").value = wp.workTime || "08:00 - 17:00 น.";
+
+    // Work Types
+    const currentTypes = wp.workTypes || [];
+    document.querySelectorAll("input[name='wp-work-type']").forEach(cb => {
+        cb.checked = currentTypes.includes(cb.value);
+    });
+    const workTypeOtherInput = document.getElementById("wp-work-type-other");
+    if (workTypeOtherInput) {
+        if (currentTypes.includes("อื่นๆ")) {
+            workTypeOtherInput.style.display = "inline-block";
+            workTypeOtherInput.value = wp.workTypesOther || "";
+        } else {
+            workTypeOtherInput.style.display = "none";
+            workTypeOtherInput.value = "";
+        }
+    }
 
     // Radios
     const safetyRadios = document.querySelectorAll("input[name='wp-safety-scope']");
@@ -4929,11 +5002,34 @@ function viewWorkPermitPrint(id) {
 
     // Project table info
     document.getElementById("print-wp-project-name").innerText = wp.projectName || "-";
+    document.getElementById("print-wp-job-title").innerText = wp.jobTitle || "ตรวจเช็คบำรุงรักษาเชิงป้องกันประจำปี (PM)";
     document.getElementById("print-wp-company-name").innerText = wp.companyName || "-";
-    document.getElementById("print-wp-location").innerText = wp.location || "-";
     document.getElementById("print-wp-contact-name").innerText = wp.contactName || "-";
-    document.getElementById("print-wp-service-order").innerText = wp.serviceOrderNumber || "-";
-    document.getElementById("print-wp-start-date").innerText = wp.startDate || "-";
+
+    // Location with Google Maps link
+    let locHtml = wp.location || "-";
+    if (wp.mapsUrl) {
+        locHtml += ` <a href="${wp.mapsUrl}" target="_blank" style="margin-left: 8px; font-weight: 700; color: #0284c7; text-decoration: underline; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 3px;">📍 เปิดแผนที่ Google Maps</a>`;
+    }
+    document.getElementById("print-wp-location").innerHTML = locHtml;
+
+    // Work Date and Time
+    const workTimeStr = wp.workTime ? ` (เวลา ${wp.workTime})` : " (เวลา 08:00 - 17:00 น.)";
+    document.getElementById("print-wp-start-date").innerText = `${wp.startDate || '-'} ${workTimeStr}`;
+
+    // Work Types with Checkboxes
+    const allWorkTypes = ["งานทั่วไป", "งานบนที่สูง", "งานเกี่ยวกับไฟฟ้า", "งานในที่อับอากาศ", "งานประกายไฟ/ความร้อน", "อื่นๆ"];
+    const currentTypes = wp.workTypes || [];
+    let workTypesHtml = allWorkTypes.map(type => {
+        const isChecked = currentTypes.includes(type);
+        const checkClass = isChecked ? "checked" : "";
+        let label = type;
+        if (type === "อื่นๆ" && isChecked && wp.workTypesOther) {
+            label = `อื่นๆ (${wp.workTypesOther})`;
+        }
+        return `<span class="wp-scope-item"><span class="wp-checkbox-box ${checkClass}"></span> ${label}</span>`;
+    }).join("");
+    document.getElementById("print-wp-work-types").innerHTML = workTypesHtml;
 
     // Scopes with Checkboxes
     const safetyOptions = ["มี จป.วิชาชีพ", "ไม่ต้องมี จป.วิชาชีพ", "จป. หัวหน้างาน", "อื่นๆ"];
@@ -4976,7 +5072,6 @@ function viewWorkPermitPrint(id) {
             `;
             supTbody.appendChild(tr);
         });
-        // Signer info
         const primarySup = wp.supervisors[0];
         document.getElementById("print-wp-signer-kke").innerText = primarySup.name || "...................................................";
         document.getElementById("print-wp-signer-role").innerText = primarySup.role || "Senior Foreman / ผู้ควบคุมงาน";
@@ -5005,6 +5100,98 @@ function viewWorkPermitPrint(id) {
 
     // Switch to print view tab
     window.switchTab("work-permit-print");
+}
+
+// Google Maps Picker Logic
+function initGoogleMapsPicker() {
+    const btnOpen = document.getElementById("btn-open-gmaps-picker");
+    const modalMaps = document.getElementById("modal-gmaps-picker");
+    const btnClose = document.getElementById("btn-close-gmaps-modal");
+    const btnCancel = document.getElementById("btn-cancel-gmaps");
+    const btnSearch = document.getElementById("btn-search-gmaps");
+    const inputSearch = document.getElementById("gmaps-search-input");
+    const inputPaste = document.getElementById("gmaps-paste-link");
+    const iframe = document.getElementById("gmaps-preview-iframe");
+    const btnApply = document.getElementById("btn-apply-gmaps");
+    const btnOpenReal = document.getElementById("btn-open-real-gmaps");
+    const btnClearUrl = document.getElementById("btn-clear-maps-url");
+
+    if (!modalMaps) return;
+
+    function updateIframeQuery(query) {
+        if (!query) return;
+        iframe.src = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+        if (btnOpenReal) {
+            btnOpenReal.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+        }
+    }
+
+    if (btnOpen) {
+        btnOpen.addEventListener("click", () => {
+            const currentLoc = document.getElementById("wp-input-location")?.value || "";
+            const currentProj = document.getElementById("wp-input-project-name")?.value || "";
+            const currentUrl = document.getElementById("wp-input-maps-url")?.value || "";
+
+            const initialQuery = currentLoc || currentProj || "ประเทศไทย";
+            if (inputSearch) inputSearch.value = currentLoc || currentProj;
+            if (inputPaste) inputPaste.value = currentUrl;
+
+            updateIframeQuery(initialQuery);
+            modalMaps.style.display = "flex";
+        });
+    }
+
+    if (btnClose) btnClose.addEventListener("click", () => { modalMaps.style.display = "none"; });
+    if (btnCancel) btnCancel.addEventListener("click", () => { modalMaps.style.display = "none"; });
+
+    if (btnSearch && inputSearch) {
+        btnSearch.addEventListener("click", () => {
+            const q = inputSearch.value.trim();
+            if (q) updateIframeQuery(q);
+        });
+        inputSearch.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                btnSearch.click();
+            }
+        });
+    }
+
+    if (inputPaste) {
+        inputPaste.addEventListener("input", (e) => {
+            const val = e.target.value.trim();
+            if (val) updateIframeQuery(val);
+        });
+    }
+
+    if (btnApply) {
+        btnApply.addEventListener("click", () => {
+            const pasteLink = inputPaste ? inputPaste.value.trim() : "";
+            const searchQuery = inputSearch ? inputSearch.value.trim() : "";
+
+            let finalMapsUrl = pasteLink;
+            if (!finalMapsUrl && searchQuery) {
+                finalMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchQuery)}`;
+            }
+
+            const locInput = document.getElementById("wp-input-location");
+            if (locInput && searchQuery && (!locInput.value || confirm("ต้องการอัปเดตช่องสถานที่ให้ตรงกับคำค้นหา Google Maps หรือไม่?"))) {
+                locInput.value = searchQuery;
+            }
+
+            document.getElementById("wp-input-maps-url").value = finalMapsUrl;
+            updateMapsUrlBadge(finalMapsUrl);
+
+            modalMaps.style.display = "none";
+        });
+    }
+
+    if (btnClearUrl) {
+        btnClearUrl.addEventListener("click", () => {
+            document.getElementById("wp-input-maps-url").value = "";
+            updateMapsUrlBadge("");
+        });
+    }
 }
 
 // Initialize Work Permit Event Listeners
@@ -5050,6 +5237,36 @@ document.addEventListener("DOMContentLoaded", () => {
         btnImportTeam.addEventListener("click", importTeamToWorkers);
     }
 
+    // Job Title Presets
+    document.querySelectorAll(".wp-job-preset-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const titleInput = document.getElementById("wp-input-job-title");
+            if (titleInput && btn.dataset.title) {
+                titleInput.value = btn.dataset.title;
+            }
+        });
+    });
+
+    // Work Time Presets
+    document.querySelectorAll(".wp-time-preset-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const timeInput = document.getElementById("wp-input-work-time");
+            if (timeInput && btn.dataset.time) {
+                timeInput.value = btn.dataset.time;
+            }
+        });
+    });
+
+    // Work Type "อื่นๆ" Toggle
+    const cbOther = document.getElementById("wp-work-type-other-checkbox");
+    const inputOther = document.getElementById("wp-work-type-other");
+    if (cbOther && inputOther) {
+        cbOther.addEventListener("change", (e) => {
+            inputOther.style.display = e.target.checked ? "inline-block" : "none";
+            if (e.target.checked) inputOther.focus();
+        });
+    }
+
     // Scope Radio Toggle Handlers
     document.querySelectorAll("input[name='wp-safety-scope']").forEach(r => {
         r.addEventListener("change", (e) => {
@@ -5080,12 +5297,21 @@ document.addEventListener("DOMContentLoaded", () => {
             const editId = document.getElementById("wp-edit-id").value;
             const docNumber = document.getElementById("wp-input-doc-number").value.trim();
             const docDate = document.getElementById("wp-input-doc-date").value;
-            const serviceOrderNumber = document.getElementById("wp-input-service-order").value.trim();
+            const jobTitle = document.getElementById("wp-input-job-title").value.trim();
             const projectName = document.getElementById("wp-input-project-name").value.trim();
             const companyName = document.getElementById("wp-input-company-name").value.trim();
             const contactName = document.getElementById("wp-input-contact-name").value.trim();
             const location = document.getElementById("wp-input-location").value.trim();
+            const mapsUrl = document.getElementById("wp-input-maps-url").value.trim();
             const startDate = document.getElementById("wp-input-start-date").value.trim();
+            const workTime = document.getElementById("wp-input-work-time").value.trim();
+
+            // Collect Work Types
+            const workTypes = [];
+            document.querySelectorAll("input[name='wp-work-type']:checked").forEach(cb => {
+                workTypes.push(cb.value);
+            });
+            const workTypesOther = document.getElementById("wp-work-type-other")?.value.trim() || "";
 
             const safetyScope = document.querySelector("input[name='wp-safety-scope']:checked")?.value || "ไม่ต้องมี จป.วิชาชีพ";
             const safetyScopeOther = document.getElementById("wp-safety-scope-other")?.value.trim() || "";
@@ -5128,12 +5354,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 id: editId || `WP-${Date.now()}`,
                 docNumber,
                 docDate,
-                serviceOrderNumber,
+                jobTitle,
+                workTypes,
+                workTypesOther,
                 projectName,
                 companyName,
                 contactName,
                 location,
+                mapsUrl,
                 startDate,
+                workTime,
                 safetyScope,
                 safetyScopeOther,
                 controlScope,
@@ -5182,6 +5412,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Google Maps Picker
+    initGoogleMapsPicker();
+
     // Initial render
     loadWorkPermitsFromLocalStorage();
 });
@@ -5193,4 +5426,5 @@ window.openEditWorkPermitModal = openEditWorkPermitModal;
 window.deleteWorkPermit = deleteWorkPermit;
 window.viewWorkPermitPrint = viewWorkPermitPrint;
 window.importTeamToWorkers = importTeamToWorkers;
+
 
