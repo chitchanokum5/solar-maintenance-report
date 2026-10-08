@@ -1140,10 +1140,11 @@
                                         <thead>
                                             <tr style="background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--border-color);">
                                                 <th style="padding: 8px; text-align: center; width: 45px;">ลำดับ</th>
-                                                <th style="padding: 8px; text-align: left;">ชื่อ-สกุล <span style="color: red;">*</span></th>
-                                                <th style="padding: 8px; text-align: left; width: 170px;">เลขบัตรประชาชน (13 หลัก)</th>
-                                                <th style="padding: 8px; text-align: left; width: 140px;">เบอร์โทร</th>
-                                                <th style="padding: 8px; text-align: left; width: 130px;">หมายเหตุ</th>
+                                                <th style="padding: 8px; text-align: left; min-width: 160px;">ชื่อ-สกุล <span style="color: red;">*</span></th>
+                                                <th style="padding: 8px; text-align: left; width: 155px;">เลขบัตรประชาชน (13 หลัก)</th>
+                                                <th style="padding: 8px; text-align: left; width: 125px;">เบอร์โทร</th>
+                                                <th style="padding: 8px; text-align: center; width: 135px;">รูปบัตร ปชช.</th>
+                                                <th style="padding: 8px; text-align: left; width: 110px;">หมายเหตุ</th>
                                                 <th style="padding: 8px; text-align: center; width: 45px;"></th>
                                             </tr>
                                         </thead>
@@ -1151,6 +1152,7 @@
                                             <!-- Dynamic Worker Rows -->
                                         </tbody>
                                     </table>
+                                    <datalist id="wp-team-members-datalist"></datalist>
                                 </div>
                             </div>
 
@@ -1219,6 +1221,10 @@
                         <span>กลับไปรายการ</span>
                     </button>
                     <div style="display: flex; align-items: center; gap: 10px; margin-left: auto;">
+                        <label style="font-size: 0.82rem; color: var(--text-primary); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color);">
+                            <input type="checkbox" id="wp-print-include-idcards" checked style="accent-color: var(--accent-primary); width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-weight: 500;">แนบสำเนาบัตร ปชช. ท้ายเอกสาร</span>
+                        </label>
                         <button class="btn btn-outline" id="btn-edit-current-wp">
                             <i data-lucide="edit-3"></i>
                             <span>แก้ไขเอกสารนี้</span>
@@ -1346,6 +1352,9 @@
                             </td>
                         </tr>
                     </table>
+                    
+                    <!-- Dynamic ID Card Attachment Pages (Page 2+) -->
+                    <div id="print-wp-idcards-container"></div>
                 </div>
             </section>
 
@@ -1773,6 +1782,25 @@
             <div class="modal-actions" style="display: flex; gap: 10px;">
                 <button type="button" class="btn btn-outline" id="btn-add-plan-cancel" style="flex: 1;">ยกเลิก</button>
                 <button type="button" class="btn btn-primary" id="btn-add-plan-save" style="flex: 1; background-color: #3b82f6; border-color: #3b82f6; color: #fff; font-weight: 600;">บันทึกแผนงาน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ID Card Image Viewer Modal -->
+    <div class="modal-overlay no-print" id="modal-idcard-viewer" style="display: none; z-index: 10001; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px);">
+        <div class="modal-card" style="max-width: 650px; width: 92%; padding: 1.25rem; text-align: center; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                <h4 id="idcard-viewer-title" style="margin: 0; font-size: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                    🪪 <span>สำเนาบัตรประจำตัวประชาชน</span>
+                </h4>
+                <button type="button" class="modal-close-btn" id="btn-close-idcard-viewer" style="background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            <div id="idcard-viewer-content" style="max-height: 75vh; overflow: auto; display: flex; justify-content: center; align-items: center; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                <img id="idcard-viewer-img" src="" alt="ID Card" style="max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15);">
+            </div>
+            <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+                <span id="idcard-viewer-subtitle" style="font-size: 0.85rem; color: var(--text-secondary);"></span>
+                <button type="button" class="btn btn-outline btn-sm" id="btn-close-idcard-viewer-2">ปิดหน้าต่าง</button>
             </div>
         </div>
     </div>
