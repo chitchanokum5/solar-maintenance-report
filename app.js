@@ -28,17 +28,23 @@ function getSortTime(r) {
 // ==========================================
 // SHARED CLOUD DATABASE SYNC (SAFE MERGE & LOCAL FIRST)
 // ==========================================
+// Google Drive & Cloud Synchronization Helpers
+// ==========================================
+const DEFAULT_GOOGLE_DRIVE_WEBHOOK = "https://script.google.com/macros/s/AKfycbw7MbWrRJDM5zK_cYmc2ZAi1QpxSfE2FIvtXuFj-9cc47hz_rJjoLYNoKmsGoOT6VA/exec";
+
 function getCloudEndpoint() {
-    return localStorage.getItem("google_drive_webhook_url") || "https://script.google.com/macros/s/AKfycbzcjeDu6dosLenQf-GaSQIIuCHH2XPsKVmQAESto7URh19Bc376OU2gDiFWNyG2U_YI/exec";
+    return localStorage.getItem("google_drive_webhook_url") || DEFAULT_GOOGLE_DRIVE_WEBHOOK;
 }
 let isCloudSyncing = false;
 
 // Auto-migrate old webhook URL to new one in LocalStorage
 (function() {
     const currentWebhook = localStorage.getItem("google_drive_webhook_url");
-    if (currentWebhook && currentWebhook.includes("AKfycbyyPO7JYaPoit4tNtCwP9sYaSBbilcjda0fHeoUEbat4B1zEMX3UBK9uWVPoyREoY2X5Q")) {
-        localStorage.setItem("google_drive_webhook_url", "https://script.google.com/macros/s/AKfycbzcjeDu6dosLenQf-GaSQIIuCHH2XPsKVmQAESto7URh19Bc376OU2gDiFWNyG2U_YI/exec");
-        console.log("Auto-migrated Google Apps Script URL to the new deployment.");
+    if (!currentWebhook || 
+        currentWebhook.includes("AKfycbyyPO7JYaPoit4tNtCwP9sYaSBbilcjda0fHeoUEbat4B1zEMX3UBK9uWVPoyREoY2X5Q") ||
+        currentWebhook.includes("AKfycbzcjeDu6dosLenQf-GaSQIIuCHH2XPsKVmQAESto7URh19Bc376OU2gDiFWNyG2U_YI")) {
+        localStorage.setItem("google_drive_webhook_url", DEFAULT_GOOGLE_DRIVE_WEBHOOK);
+        console.log("Updated Google Apps Script URL to the requested default deployment.");
     }
 })();
 
@@ -3738,7 +3744,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function openSettings() {
         if (modalSettings) {
             // Load saved webhook URL with default fallback
-            const savedUrl = localStorage.getItem("google_drive_webhook_url") || "https://script.google.com/macros/s/AKfycbzcjeDu6dosLenQf-GaSQIIuCHH2XPsKVmQAESto7URh19Bc376OU2gDiFWNyG2U_YI/exec";
+            const savedUrl = localStorage.getItem("google_drive_webhook_url") || DEFAULT_GOOGLE_DRIVE_WEBHOOK;
             if (inputDriveWebhookUrl) inputDriveWebhookUrl.value = savedUrl;
             modalSettings.style.display = "flex";
         }
@@ -3787,7 +3793,7 @@ function selectSiteForNewReport(siteName) {
 
 // Upload Report to Google Drive Web App
 function uploadReportToGoogleDrive(report) {
-    const webhookUrl = localStorage.getItem("google_drive_webhook_url") || "https://script.google.com/macros/s/AKfycbzcjeDu6dosLenQf-GaSQIIuCHH2XPsKVmQAESto7URh19Bc376OU2gDiFWNyG2U_YI/exec";
+    const webhookUrl = localStorage.getItem("google_drive_webhook_url") || DEFAULT_GOOGLE_DRIVE_WEBHOOK;
     if (!webhookUrl || webhookUrl.trim() === "") {
         // Show settings modal directly if not configured
         const settingsModal = document.getElementById("settings-modal");
