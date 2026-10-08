@@ -4717,85 +4717,99 @@ const teamIdCardsMaster = {
         nickname: "โปเต้",
         idCard: "1180501113786",
         phone: "083-9411741",
-        image: "assets/team_idcards/id_tharadon.jpg"
+        image: "assets/team_idcards/id_tharadon.jpg",
+        certImage: "assets/team_certs/cert_tharadon.jpg"
     },
     "นิธิกุล ค่อมสิงห์": {
         nickname: "แบงค์น้อย",
         idCard: "1400700204703",
         phone: "083-5607583",
-        image: "assets/team_idcards/id_nithikun.jpg"
+        image: "assets/team_idcards/id_nithikun.jpg",
+        certImage: "assets/team_certs/cert_nithikun.jpg"
     },
     "ชุติพนธ์ โรจน์เจริญ": {
         nickname: "บอส",
         idCard: "1409901821295",
         phone: "092-1549484",
-        image: "assets/team_idcards/id_chutipon.jpg"
+        image: "assets/team_idcards/id_chutipon.jpg",
+        certImage: "assets/team_certs/cert_chutipon.jpg"
     },
     "ณัฐพงษ์ ภักโสภา": {
         nickname: "เอิร์ท",
         idCard: "1409901425420",
         phone: "097-2195192",
-        image: "assets/team_idcards/id_nattapong_p.jpg"
+        image: "assets/team_idcards/id_nattapong_p.jpg",
+        certImage: "assets/team_certs/cert_nattapong_p.jpg"
     },
     "ทินกร บุญฤทธิ์": {
         nickname: "โจ",
         idCard: "1440500160516",
         phone: "064-5633436",
-        image: "assets/team_idcards/id_tinnakorn.jpg"
+        image: "assets/team_idcards/id_tinnakorn.jpg",
+        certImage: "assets/team_certs/cert_tinnakorn.jpg"
     },
     "ปิติชัย ศรีสุนนท์": {
         nickname: "แบงค์",
         idCard: "1409903097012",
         phone: "095-6632197",
-        image: "assets/team_idcards/id_pitichai.jpg"
+        image: "assets/team_idcards/id_pitichai.jpg",
+        certImage: "assets/team_certs/cert_pitichai.jpg"
     },
     "นุชนาฏ คำผุย": {
         nickname: "ตาล",
         idCard: "1400800098824",
         phone: "095-2925300",
-        image: "assets/team_idcards/id_nutchanat.jpg"
+        image: "assets/team_idcards/id_nutchanat.jpg",
+        certImage: "assets/team_certs/cert_nutchanat.jpg"
     },
     "นุชนาฎ คำผุย": {
         nickname: "ตาล",
         idCard: "1400800098824",
         phone: "095-2925300",
-        image: "assets/team_idcards/id_nutchanat.jpg"
+        image: "assets/team_idcards/id_nutchanat.jpg",
+        certImage: "assets/team_certs/cert_nutchanat.jpg"
     },
     "ชิตชนก ช่างไม้": {
         nickname: "อั้ม",
         idCard: "1401701232604",
         phone: "095-2925300",
-        image: "assets/team_idcards/id_chitchanok.jpg"
+        image: "assets/team_idcards/id_chitchanok.jpg",
+        certImage: ""
     },
     "พงษ์พิพัฒน์ โปรถนัด": {
         nickname: "เต๋า",
         idCard: "1420800064903",
         phone: "094-2954442",
-        image: "assets/team_idcards/id_pongpipat.jpg"
+        image: "assets/team_idcards/id_pongpipat.jpg",
+        certImage: "assets/team_certs/cert_pongpipat.jpg"
     },
     "พงษ์ภิวัฒน์ โปรถนัด": {
         nickname: "เต๋า",
         idCard: "1420800064903",
         phone: "094-2954442",
-        image: "assets/team_idcards/id_pongpipat.jpg"
+        image: "assets/team_idcards/id_pongpipat.jpg",
+        certImage: "assets/team_certs/cert_pongpipat.jpg"
     },
     "พรชัย สุภาษร": {
         nickname: "พรชัย",
         idCard: "1349901165968",
         phone: "064-3358286",
-        image: "assets/team_idcards/id_pornchai.jpg"
+        image: "assets/team_idcards/id_pornchai.jpg",
+        certImage: "assets/team_certs/cert_pornchai.jpg"
     },
     "พัฒน์สุวิชญ์ ช่างปรุง": {
         nickname: "พัฒน์",
         idCard: "1709901371637",
         phone: "093-0086423",
-        image: "assets/team_idcards/id_pattanasuwith.jpg"
+        image: "assets/team_idcards/id_pattanasuwith.jpg",
+        certImage: "assets/team_certs/cert_pattanasuwith.jpg"
     },
     "อรุณ ฝ่ายแก้ว": {
         nickname: "อรุณ",
         idCard: "1409901538305",
         phone: "094-1931170",
-        image: "assets/team_idcards/id_arun.jpg"
+        image: "assets/team_idcards/id_arun.jpg",
+        certImage: ""
     }
 };
 
@@ -4871,16 +4885,17 @@ function populateWpTeamMembersDatalist() {
     }
 }
 
-// Worker Rows in Modal Form (With ID Card Photo Autoload & Attachment)
-function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardImage = "") {
+// Worker Rows in Modal Form (With ID Card & Height Cert Autoload & Attachment)
+function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardImage = "", certImage = "") {
     const tbody = document.getElementById("wp-workers-tbody");
     if (!tbody) return;
 
-    // Auto-detect ID card image and info if initial image is empty
-    if (!idCardImage && name) {
+    // Auto-detect ID card image, height cert, and info if initial values are empty
+    if (name && (!idCardImage || !certImage)) {
         const info = getMemberIdCardInfo(name);
-        if (info.found && info.image) {
-            idCardImage = info.image;
+        if (info.found) {
+            if (!idCardImage && info.image) idCardImage = info.image;
+            if (!certImage && info.certImage) certImage = info.certImage;
             if (!idCard || idCard === "-") idCard = info.idCard || "";
             if (!phone || phone === "-") phone = info.phone || "";
         }
@@ -4891,6 +4906,7 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
     tr.className = "wp-worker-tr";
     tr.style.borderBottom = "1px solid var(--border-color)";
     tr.dataset.idCardImage = idCardImage || "";
+    tr.dataset.certImage = certImage || "";
 
     tr.innerHTML = `
         <td style="padding: 6px; text-align: center; color: var(--text-muted); font-weight: 600;" class="wp-worker-seq">${rowCount}</td>
@@ -4909,6 +4925,12 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
             </div>
             <input type="file" accept="image/*" class="wp-worker-file-input" style="display: none;">
         </td>
+        <td style="padding: 6px; text-align: center;" class="wp-worker-cert-td">
+            <div class="wp-worker-cert-cell">
+                <!-- Height Cert Photo Slot (rendered dynamically) -->
+            </div>
+            <input type="file" accept="image/*" class="wp-worker-cert-file-input" style="display: none;">
+        </td>
         <td style="padding: 6px;">
             <input type="text" class="wp-worker-remark" placeholder="หมายเหตุ" value="${remark}" style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
         </td>
@@ -4922,6 +4944,8 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
     const phoneInput = tr.querySelector(".wp-worker-phone");
     const idCardCell = tr.querySelector(".wp-worker-idcard-cell");
     const fileInput = tr.querySelector(".wp-worker-file-input");
+    const certCell = tr.querySelector(".wp-worker-cert-cell");
+    const certFileInput = tr.querySelector(".wp-worker-cert-file-input");
 
     function renderIdCardCell() {
         const currentImg = tr.dataset.idCardImage;
@@ -4964,6 +4988,47 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
         }
     }
 
+    function renderCertCell() {
+        const currentCert = tr.dataset.certImage;
+        const currentName = nameInput.value.trim() || "ผู้ปฏิบัติงาน";
+        certCell.innerHTML = "";
+
+        if (currentCert) {
+            const wrap = document.createElement("div");
+            wrap.className = "wp-idcard-thumb-wrap";
+            wrap.innerHTML = `
+                <img src="${currentCert}" alt="ใบเซอร์ ${currentName}" class="wp-cert-thumb-img" title="คลิกเพื่อดูใบเซอร์ที่สูงขยาย">
+                <button type="button" class="wp-idcard-action-btn btn-view" title="ดูใบเซอร์">👁️</button>
+                <button type="button" class="wp-idcard-action-btn btn-change" title="เปลี่ยนใบเซอร์">📷</button>
+                <button type="button" class="wp-idcard-action-btn btn-remove" style="color: var(--status-danger);" title="ลบรูป">✕</button>
+            `;
+
+            wrap.querySelector(".wp-cert-thumb-img").addEventListener("click", () => {
+                showIdCardViewer(`ใบรับรองการอบรมที่สูง - ${currentName}`, tr.dataset.certImage, "หลักสูตรเทคนิคการปฏิบัติงานที่สูงอย่างปลอดภัย");
+            });
+            wrap.querySelector(".btn-view").addEventListener("click", () => {
+                showIdCardViewer(`ใบรับรองการอบรมที่สูง - ${currentName}`, tr.dataset.certImage, "หลักสูตรเทคนิคการปฏิบัติงานที่สูงอย่างปลอดภัย");
+            });
+            wrap.querySelector(".btn-change").addEventListener("click", () => {
+                certFileInput.click();
+            });
+            wrap.querySelector(".btn-remove").addEventListener("click", () => {
+                tr.dataset.certImage = "";
+                renderCertCell();
+            });
+            certCell.appendChild(wrap);
+        } else {
+            const uploadBtn = document.createElement("button");
+            uploadBtn.type = "button";
+            uploadBtn.className = "wp-cert-upload-btn";
+            uploadBtn.innerHTML = `<span>📷 แนบใบเซอร์</span>`;
+            uploadBtn.addEventListener("click", () => {
+                certFileInput.click();
+            });
+            certCell.appendChild(uploadBtn);
+        }
+    }
+
     // Name input autocomplete listener
     nameInput.addEventListener("input", () => {
         const val = nameInput.value.trim();
@@ -4979,10 +5044,14 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
                 tr.dataset.idCardImage = info.image;
                 renderIdCardCell();
             }
+            if (!tr.dataset.certImage && info.certImage) {
+                tr.dataset.certImage = info.certImage;
+                renderCertCell();
+            }
         }
     });
 
-    // Custom File Upload
+    // Custom File Upload for ID Card
     fileInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -4994,7 +5063,20 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
         reader.readAsDataURL(file);
     });
 
+    // Custom File Upload for Height Cert
+    certFileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            tr.dataset.certImage = evt.target.result;
+            renderCertCell();
+        };
+        reader.readAsDataURL(file);
+    });
+
     renderIdCardCell();
+    renderCertCell();
 
     tr.querySelector(".wp-btn-del-worker").addEventListener("click", () => {
         tr.remove();
@@ -5025,7 +5107,7 @@ function importTeamToWorkers() {
     Object.keys(teamIdCardsMaster).forEach(k => {
         const data = teamIdCardsMaster[k];
         if (!existingNames.includes(k)) {
-            addWorkerRow(k, data.idCard || "-", data.phone || "-", "", data.image || "");
+            addWorkerRow(k, data.idCard || "-", data.phone || "-", "", data.image || "", data.certImage || "");
             existingNames.push(k);
             addedCount++;
         }
@@ -5043,7 +5125,7 @@ function importTeamToWorkers() {
     }
 
     if (addedCount > 0) {
-        alert(`ดึงรายชื่อทีมงานพร้อมรูปบัตร ปชช. สำเร็จ ${addedCount} ท่าน`);
+        alert(`ดึงรายชื่อทีมงานพร้อมรูปบัตร ปชช. และใบเซอร์ที่สูง สำเร็จ ${addedCount} ท่าน`);
     } else {
         alert("รายชื่อทีมงานทั้งหมดมีอยู่ในตารางแล้ว");
     }
@@ -5245,9 +5327,9 @@ function openEditWorkPermitModal(id) {
     const workersTbody = document.getElementById("wp-workers-tbody");
     workersTbody.innerHTML = "";
     if (wp.workers && wp.workers.length > 0) {
-        wp.workers.forEach(w => addWorkerRow(w.name, w.idCard, w.phone, w.remark, w.idCardImage));
+        wp.workers.forEach(w => addWorkerRow(w.name, w.idCard, w.phone, w.remark, w.idCardImage, w.certImage));
     } else {
-        addWorkerRow("", "", "", "");
+        addWorkerRow("", "", "", "", "", "");
     }
 
     modal.style.display = "flex";
@@ -5377,6 +5459,9 @@ function viewWorkPermitPrint(id) {
     // Render dynamic ID card attachment pages (Page 2+)
     renderPrintIdCardAttachments(wp);
 
+    // Render dynamic Height Cert attachment pages (Page 3+)
+    renderPrintCertAttachments(wp);
+
     // Switch to print view tab
     window.switchTab("work-permit-print");
 }
@@ -5453,6 +5538,87 @@ function renderPrintIdCardAttachments(wp) {
 
             cardItem.querySelector("img").addEventListener("click", () => {
                 showIdCardViewer(`สำเนาบัตรประชาชน - ${w.name}`, w.img, w.idCard || "");
+            });
+
+            grid.appendChild(cardItem);
+        });
+
+        container.appendChild(pageEl);
+    }
+}
+
+// Render Dynamic A4 Height Certificate Attachments for Work Permit
+function renderPrintCertAttachments(wp) {
+    const container = document.getElementById("print-wp-certs-container");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const incCerts = document.getElementById("wp-print-include-certs")?.checked ?? true;
+    if (!incCerts || !wp || !wp.workers) return;
+
+    // Filter workers who have a height cert photo (or auto-find from master)
+    const certWorkers = [];
+    wp.workers.forEach(w => {
+        let img = w.certImage;
+        if (!img) {
+            const info = getMemberIdCardInfo(w.name);
+            if (info.found && info.certImage) img = info.certImage;
+        }
+        if (img) {
+            certWorkers.push({ ...w, img });
+        }
+    });
+
+    if (certWorkers.length === 0) return;
+
+    // Render attachment page(s) (2 certs per page side-by-side for optimal legibility)
+    const cardsPerPage = 2;
+    const totalPages = Math.ceil(certWorkers.length / cardsPerPage);
+
+    for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+        const pageWorkers = certWorkers.slice(pageIdx * cardsPerPage, (pageIdx + 1) * cardsPerPage);
+        const pageEl = document.createElement("div");
+        pageEl.className = "wp-attachment-page";
+
+        pageEl.innerHTML = `
+            <div class="wp-print-header" style="margin-bottom: 8px;">
+                <div class="wp-print-logo-col">
+                    <img src="kke-logo.png" alt="KKE Logo" class="wp-print-logo">
+                    <div class="wp-print-company-text">
+                        <div class="wp-print-company-name">บริษัท เคเคอี จำกัด</div>
+                        <div class="wp-print-company-addr">เอกสารแนบท้ายใบขออนุญาตเข้าทำงาน (Work Permit Attachments)</div>
+                    </div>
+                </div>
+                <div class="wp-print-meta-col">
+                    <div class="wp-meta-line"><strong>อ้างอิงเลขที่ :</strong> ${wp.docNumber || '-'}</div>
+                    <div class="wp-meta-line"><strong>โครงการ :</strong> ${wp.projectName || '-'}</div>
+                </div>
+            </div>
+            
+            <div style="background: #1e3a8a; color: #fff; padding: 6px 12px; font-weight: bold; font-size: 10pt; border-radius: 4px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <span>เอกสารแนบ: ใบรับรองการฝึกอบรมการปฏิบัติงานบนที่สูง (Working at Heights Certificates)</span>
+                <span style="font-size: 8.5pt; font-weight: normal; opacity: 0.9;">จำนวน ${certWorkers.length} ท่าน (หน้าที่ ${pageIdx + 1}/${totalPages})</span>
+            </div>
+
+            <div class="wp-cert-grid"></div>
+        `;
+
+        const grid = pageEl.querySelector(".wp-cert-grid");
+        pageWorkers.forEach((w, idx) => {
+            const cardItem = document.createElement("div");
+            cardItem.className = "wp-cert-item-card";
+            cardItem.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
+                    <div>
+                        <strong style="font-size: 9.5pt; color: #0f172a;">${(pageIdx * cardsPerPage) + idx + 1}. ${w.name}</strong>
+                    </div>
+                    <span style="font-size: 8.5pt; color: #2563eb; font-weight: 600;">หลักสูตรปฏิบัติงานที่สูงอย่างปลอดภัย</span>
+                </div>
+                <img src="${w.img}" alt="ใบเซอร์ ${w.name}" style="cursor: pointer;" title="คลิกเพื่อดูรูปขยาย">
+            `;
+
+            cardItem.querySelector("img").addEventListener("click", () => {
+                showIdCardViewer(`ใบรับรองการอบรมที่สูง - ${w.name}`, w.img, "หลักสูตรเทคนิคการปฏิบัติงานที่สูงอย่างปลอดภัย");
             });
 
             grid.appendChild(cardItem);
@@ -5589,7 +5755,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const btnAddWorker = document.getElementById("btn-add-wp-worker");
     if (btnAddWorker) {
-        btnAddWorker.addEventListener("click", () => { addWorkerRow("", "", "", ""); });
+        btnAddWorker.addEventListener("click", () => { addWorkerRow("", "", "", "", "", ""); });
     }
 
     const btnImportTeam = document.getElementById("btn-import-team-to-workers");
@@ -5698,7 +5864,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const phone = tr.querySelector(".wp-worker-phone")?.value.trim();
                 const remark = tr.querySelector(".wp-worker-remark")?.value.trim();
                 const idCardImage = tr.dataset.idCardImage || "";
-                if (name) workers.push({ seq: idx + 1, name, idCard, phone, remark, idCardImage });
+                const certImage = tr.dataset.certImage || "";
+                if (name) workers.push({ seq: idx + 1, name, idCard, phone, remark, idCardImage, certImage });
             });
 
             if (supervisors.length === 0) {
@@ -5780,6 +5947,17 @@ document.addEventListener("DOMContentLoaded", () => {
             if (currentViewingWorkPermitId) {
                 const wp = workPermitsList.find(w => w.id === currentViewingWorkPermitId);
                 if (wp) renderPrintIdCardAttachments(wp);
+            }
+        });
+    }
+
+    // Toggle including Height Certs on print view
+    const chkPrintCerts = document.getElementById("wp-print-include-certs");
+    if (chkPrintCerts) {
+        chkPrintCerts.addEventListener("change", () => {
+            if (currentViewingWorkPermitId) {
+                const wp = workPermitsList.find(w => w.id === currentViewingWorkPermitId);
+                if (wp) renderPrintCertAttachments(wp);
             }
         });
     }

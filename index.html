@@ -1139,13 +1139,14 @@
                                     <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
                                         <thead>
                                             <tr style="background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--border-color);">
-                                                <th style="padding: 8px; text-align: center; width: 45px;">ลำดับ</th>
-                                                <th style="padding: 8px; text-align: left; min-width: 160px;">ชื่อ-สกุล <span style="color: red;">*</span></th>
-                                                <th style="padding: 8px; text-align: left; width: 155px;">เลขบัตรประชาชน (13 หลัก)</th>
-                                                <th style="padding: 8px; text-align: left; width: 125px;">เบอร์โทร</th>
-                                                <th style="padding: 8px; text-align: center; width: 135px;">รูปบัตร ปชช.</th>
-                                                <th style="padding: 8px; text-align: left; width: 110px;">หมายเหตุ</th>
-                                                <th style="padding: 8px; text-align: center; width: 45px;"></th>
+                                                <th style="padding: 8px; text-align: center; width: 40px;">ลำดับ</th>
+                                                <th style="padding: 8px; text-align: left; min-width: 150px;">ชื่อ-สกุล <span style="color: red;">*</span></th>
+                                                <th style="padding: 8px; text-align: left; width: 140px;">เลขบัตรประชาชน (13 หลัก)</th>
+                                                <th style="padding: 8px; text-align: left; width: 110px;">เบอร์โทร</th>
+                                                <th style="padding: 8px; text-align: center; width: 125px;">รูปบัตร ปชช.</th>
+                                                <th style="padding: 8px; text-align: center; width: 125px;">ใบเซอร์ที่สูง</th>
+                                                <th style="padding: 8px; text-align: left; width: 105px;">หมายเหตุ</th>
+                                                <th style="padding: 8px; text-align: center; width: 40px;"></th>
                                             </tr>
                                         </thead>
                                         <tbody id="wp-workers-tbody">
@@ -1223,7 +1224,11 @@
                     <div style="display: flex; align-items: center; gap: 10px; margin-left: auto;">
                         <label style="font-size: 0.82rem; color: var(--text-primary); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color);">
                             <input type="checkbox" id="wp-print-include-idcards" checked style="accent-color: var(--accent-primary); width: 16px; height: 16px; cursor: pointer;">
-                            <span style="font-weight: 500;">แนบสำเนาบัตร ปชช. ท้ายเอกสาร</span>
+                            <span style="font-weight: 500;">แนบสำเนาบัตร ปชช.</span>
+                        </label>
+                        <label style="font-size: 0.82rem; color: var(--text-primary); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color);">
+                            <input type="checkbox" id="wp-print-include-certs" checked style="accent-color: var(--accent-primary); width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-weight: 500;">แนบใบเซอร์ที่สูง</span>
                         </label>
                         <button class="btn btn-outline" id="btn-edit-current-wp">
                             <i data-lucide="edit-3"></i>
@@ -1355,6 +1360,8 @@
                     
                     <!-- Dynamic ID Card Attachment Pages (Page 2+) -->
                     <div id="print-wp-idcards-container"></div>
+                    <!-- Dynamic Height Cert Attachment Pages (Page 3+) -->
+                    <div id="print-wp-certs-container"></div>
                 </div>
             </section>
 
