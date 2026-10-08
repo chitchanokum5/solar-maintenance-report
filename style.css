@@ -2742,5 +2742,100 @@ body[data-layout="floating-hero"] #tab-dashboard .kpi-grid {
     border: 1px solid #e2e8f0;
 }
 
+/* Combined Worker Documents Cell (ID Card & Height Cert in single cell after Name) */
+.wp-worker-docs-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.wp-doc-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.wp-doc-mini-thumb {
+    width: 44px;
+    height: 30px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.wp-doc-mini-thumb.cert {
+    width: 30px;
+    height: 42px;
+    object-fit: cover;
+}
+
+.wp-doc-mini-thumb:hover {
+    transform: scale(1.15);
+    border-color: var(--accent-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.wp-doc-mini-actions {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 2px;
+}
+
+.wp-doc-mini-btn {
+    padding: 1px 4px;
+    font-size: 0.68rem;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    border-radius: 3px;
+    cursor: pointer;
+    line-height: 1.1;
+    transition: all 0.15s ease;
+}
+
+.wp-doc-mini-btn:hover {
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.wp-doc-mini-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: -0.2px;
+}
+
+.wp-doc-empty-btn {
+    padding: 4px 6px;
+    font-size: 0.7rem;
+    border: 1px dashed var(--border-color);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: all 0.15s ease;
+    min-width: 44px;
+}
+
+.wp-doc-empty-btn:hover {
+    color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+
 
 

@@ -4913,23 +4913,19 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
         <td style="padding: 6px;">
             <input type="text" class="wp-worker-name" list="wp-team-members-datalist" placeholder="พิมพ์ชื่อหรือเลือกทีมงาน" required value="${name}" style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
         </td>
+        <td style="padding: 4px; text-align: center;" class="wp-worker-docs-td">
+            <div class="wp-worker-docs-cell">
+                <div class="wp-doc-slot wp-idcard-slot"></div>
+                <input type="file" accept="image/*" class="wp-worker-file-input" style="display: none;">
+                <div class="wp-doc-slot wp-cert-slot"></div>
+                <input type="file" accept="image/*" class="wp-worker-cert-file-input" style="display: none;">
+            </div>
+        </td>
         <td style="padding: 6px;">
             <input type="text" class="wp-worker-idcard" placeholder="เลข 13 หลัก" value="${idCard}" maxlength="17" style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem; font-family: monospace;">
         </td>
         <td style="padding: 6px;">
             <input type="text" class="wp-worker-phone" placeholder="เบอร์โทร" value="${phone}" style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
-        </td>
-        <td style="padding: 6px; text-align: center;" class="wp-worker-idcard-td">
-            <div class="wp-worker-idcard-cell">
-                <!-- ID Card Photo Slot (rendered dynamically) -->
-            </div>
-            <input type="file" accept="image/*" class="wp-worker-file-input" style="display: none;">
-        </td>
-        <td style="padding: 6px; text-align: center;" class="wp-worker-cert-td">
-            <div class="wp-worker-cert-cell">
-                <!-- Height Cert Photo Slot (rendered dynamically) -->
-            </div>
-            <input type="file" accept="image/*" class="wp-worker-cert-file-input" style="display: none;">
         </td>
         <td style="padding: 6px;">
             <input type="text" class="wp-worker-remark" placeholder="หมายเหตุ" value="${remark}" style="width: 100%; padding: 0.4rem 0.6rem; border-radius: var(--border-radius-sm); border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-size: 0.82rem;">
@@ -4942,27 +4938,30 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
     const nameInput = tr.querySelector(".wp-worker-name");
     const idCardInput = tr.querySelector(".wp-worker-idcard");
     const phoneInput = tr.querySelector(".wp-worker-phone");
-    const idCardCell = tr.querySelector(".wp-worker-idcard-cell");
+    const idCardSlot = tr.querySelector(".wp-idcard-slot");
     const fileInput = tr.querySelector(".wp-worker-file-input");
-    const certCell = tr.querySelector(".wp-worker-cert-cell");
+    const certSlot = tr.querySelector(".wp-cert-slot");
     const certFileInput = tr.querySelector(".wp-worker-cert-file-input");
 
     function renderIdCardCell() {
         const currentImg = tr.dataset.idCardImage;
         const currentName = nameInput.value.trim() || "ผู้ปฏิบัติงาน";
-        idCardCell.innerHTML = "";
+        idCardSlot.innerHTML = "";
 
         if (currentImg) {
             const wrap = document.createElement("div");
-            wrap.className = "wp-idcard-thumb-wrap";
+            wrap.className = "wp-doc-slot";
             wrap.innerHTML = `
-                <img src="${currentImg}" alt="บัตร ${currentName}" class="wp-idcard-thumb-img" title="คลิกเพื่อดูรูปบัตรขยาย">
-                <button type="button" class="wp-idcard-action-btn btn-view" title="ดูรูปภาพ">👁️</button>
-                <button type="button" class="wp-idcard-action-btn btn-change" title="เปลี่ยนรูปภาพ">📷</button>
-                <button type="button" class="wp-idcard-action-btn btn-remove" style="color: var(--status-danger);" title="ลบรูป">✕</button>
+                <span class="wp-doc-mini-label">บัตร ปชช.</span>
+                <img src="${currentImg}" alt="บัตร ${currentName}" class="wp-doc-mini-thumb" title="คลิกเพื่อดูรูปบัตรขยาย">
+                <div class="wp-doc-mini-actions">
+                    <button type="button" class="wp-doc-mini-btn btn-view" title="ดูรูป">👁️</button>
+                    <button type="button" class="wp-doc-mini-btn btn-change" title="เปลี่ยนรูป">📷</button>
+                    <button type="button" class="wp-doc-mini-btn btn-remove" style="color: var(--status-danger);" title="ลบรูป">✕</button>
+                </div>
             `;
 
-            wrap.querySelector(".wp-idcard-thumb-img").addEventListener("click", () => {
+            wrap.querySelector(".wp-doc-mini-thumb").addEventListener("click", () => {
                 showIdCardViewer(`สำเนาบัตรประชาชน - ${currentName}`, tr.dataset.idCardImage, idCardInput.value.trim());
             });
             wrap.querySelector(".btn-view").addEventListener("click", () => {
@@ -4975,35 +4974,39 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
                 tr.dataset.idCardImage = "";
                 renderIdCardCell();
             });
-            idCardCell.appendChild(wrap);
+            idCardSlot.appendChild(wrap);
         } else {
             const uploadBtn = document.createElement("button");
             uploadBtn.type = "button";
-            uploadBtn.className = "wp-idcard-upload-btn";
-            uploadBtn.innerHTML = `<span>📷 แนบรูปบัตร</span>`;
+            uploadBtn.className = "wp-doc-empty-btn";
+            uploadBtn.innerHTML = `<span>📷</span><span>+ บัตร</span>`;
+            uploadBtn.title = "แนบรูปบัตร ปชช.";
             uploadBtn.addEventListener("click", () => {
                 fileInput.click();
             });
-            idCardCell.appendChild(uploadBtn);
+            idCardSlot.appendChild(uploadBtn);
         }
     }
 
     function renderCertCell() {
         const currentCert = tr.dataset.certImage;
         const currentName = nameInput.value.trim() || "ผู้ปฏิบัติงาน";
-        certCell.innerHTML = "";
+        certSlot.innerHTML = "";
 
         if (currentCert) {
             const wrap = document.createElement("div");
-            wrap.className = "wp-idcard-thumb-wrap";
+            wrap.className = "wp-doc-slot";
             wrap.innerHTML = `
-                <img src="${currentCert}" alt="ใบเซอร์ ${currentName}" class="wp-cert-thumb-img" title="คลิกเพื่อดูใบเซอร์ที่สูงขยาย">
-                <button type="button" class="wp-idcard-action-btn btn-view" title="ดูใบเซอร์">👁️</button>
-                <button type="button" class="wp-idcard-action-btn btn-change" title="เปลี่ยนใบเซอร์">📷</button>
-                <button type="button" class="wp-idcard-action-btn btn-remove" style="color: var(--status-danger);" title="ลบรูป">✕</button>
+                <span class="wp-doc-mini-label" style="color: #3b82f6;">ใบเซอร์</span>
+                <img src="${currentCert}" alt="ใบเซอร์ ${currentName}" class="wp-doc-mini-thumb cert" title="คลิกเพื่อดูใบเซอร์ที่สูงขยาย">
+                <div class="wp-doc-mini-actions">
+                    <button type="button" class="wp-doc-mini-btn btn-view" title="ดูใบเซอร์">👁️</button>
+                    <button type="button" class="wp-doc-mini-btn btn-change" title="เปลี่ยนใบเซอร์">📷</button>
+                    <button type="button" class="wp-doc-mini-btn btn-remove" style="color: var(--status-danger);" title="ลบรูป">✕</button>
+                </div>
             `;
 
-            wrap.querySelector(".wp-cert-thumb-img").addEventListener("click", () => {
+            wrap.querySelector(".wp-doc-mini-thumb").addEventListener("click", () => {
                 showIdCardViewer(`ใบรับรองการอบรมที่สูง - ${currentName}`, tr.dataset.certImage, "หลักสูตรเทคนิคการปฏิบัติงานที่สูงอย่างปลอดภัย");
             });
             wrap.querySelector(".btn-view").addEventListener("click", () => {
@@ -5016,16 +5019,17 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
                 tr.dataset.certImage = "";
                 renderCertCell();
             });
-            certCell.appendChild(wrap);
+            certSlot.appendChild(wrap);
         } else {
             const uploadBtn = document.createElement("button");
             uploadBtn.type = "button";
-            uploadBtn.className = "wp-cert-upload-btn";
-            uploadBtn.innerHTML = `<span>📷 แนบใบเซอร์</span>`;
+            uploadBtn.className = "wp-doc-empty-btn";
+            uploadBtn.innerHTML = `<span>📜</span><span>+ เซอร์</span>`;
+            uploadBtn.title = "แนบใบเซอร์ที่สูง";
             uploadBtn.addEventListener("click", () => {
                 certFileInput.click();
             });
-            certCell.appendChild(uploadBtn);
+            certSlot.appendChild(uploadBtn);
         }
     }
 
@@ -5442,10 +5446,26 @@ function viewWorkPermitPrint(id) {
     workerTbody.innerHTML = "";
     if (wp.workers && wp.workers.length > 0) {
         wp.workers.forEach((w, idx) => {
+            let idImg = w.idCardImage;
+            let certImg = w.certImage;
+            if (!idImg || !certImg) {
+                const info = getMemberIdCardInfo(w.name);
+                if (info.found) {
+                    if (!idImg && info.image) idImg = info.image;
+                    if (!certImg && info.certImage) certImg = info.certImage;
+                }
+            }
+
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td style="text-align: center;">${idx + 1}</td>
                 <td><strong>${w.name || '-'}</strong></td>
+                <td style="text-align: center; vertical-align: middle; padding: 3px 4px;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        ${idImg ? `<img src="${idImg}" alt="บัตร" style="height: 22px; width: 34px; object-fit: cover; border-radius: 2px; border: 1px solid #cbd5e1; cursor: pointer;" title="คลิกเพื่อดูบัตร ปชช. ขยาย" onclick="showIdCardViewer('สำเนาบัตรประชาชน - ${w.name}', '${idImg}', '${w.idCard || ''}')">` : `<span style="font-size: 7pt; color: #94a3b8;">-</span>`}
+                        ${certImg ? `<img src="${certImg}" alt="ใบเซอร์" style="height: 30px; width: 22px; object-fit: cover; border-radius: 2px; border: 1px solid #cbd5e1; cursor: pointer;" title="คลิกเพื่อดูใบเซอร์ที่สูงขยาย" onclick="showIdCardViewer('ใบรับรองการอบรมที่สูง - ${w.name}', '${certImg}', 'หลักสูตรเทคนิคการปฏิบัติงานที่สูงอย่างปลอดภัย')">` : `<span style="font-size: 7pt; color: #94a3b8;">-</span>`}
+                    </div>
+                </td>
                 <td style="font-family: monospace; letter-spacing: 0.5px;">${w.idCard || '-'}</td>
                 <td>${w.phone || '-'}</td>
                 <td>${w.remark || '-'}</td>
@@ -5453,7 +5473,7 @@ function viewWorkPermitPrint(id) {
             workerTbody.appendChild(tr);
         });
     } else {
-        workerTbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">-</td></tr>`;
+        workerTbody.innerHTML = `<tr><td colspan="6" style="text-align: center;">-</td></tr>`;
     }
 
     // Render dynamic ID card attachment pages (Page 2+)
