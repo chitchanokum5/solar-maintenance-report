@@ -1363,6 +1363,7 @@ function initFormHandlers() {
         const cmProblemDesc = document.getElementById("cm-problem-desc")?.value.trim() || "";
         const cmActionDesc = document.getElementById("cm-action-desc")?.value.trim() || "";
         const cmRepairStatus = document.getElementById("cm-repair-status")?.value || "Completed";
+        const jobDetails = document.getElementById("job-details")?.value.trim() || "";
         const recommendations = document.getElementById("recommendations")?.value.trim() || "";
 
         if (maintenanceType === "Corrective Maintenance") {
@@ -1409,6 +1410,7 @@ function initFormHandlers() {
             cmImagesBefore: [...currentCmImagesBefore],
             cmImagesAfter: [...currentCmImagesAfter],
             status,
+            jobDetails,
             recommendations,
             imagesInverterRoom: [...currentImagesInverterRoom],
             imagesRooftop: [...currentImagesRooftop]
@@ -2209,6 +2211,18 @@ function viewReportDetail(id) {
         photoSection.style.display = "none";
     }
 
+    // Job Details before Sign-off
+    const jobDetailsSec = document.getElementById("print-job-details-section");
+    const jobDetailsEl = document.getElementById("print-job-details-text");
+    if (jobDetailsSec && jobDetailsEl) {
+        if (report.jobDetails && report.jobDetails.trim() !== "") {
+            jobDetailsEl.innerText = report.jobDetails;
+            jobDetailsSec.style.display = "block";
+        } else {
+            jobDetailsSec.style.display = "none";
+        }
+    }
+
     // Bind Print Button
     const printBtn = document.getElementById("btn-trigger-print");
     const newPrintBtn = printBtn.cloneNode(true);
@@ -2620,7 +2634,10 @@ function editReport(id) {
         }
     }
     
-    // Recommendations
+    // Job details & Recommendations
+    if (document.getElementById("job-details")) {
+        document.getElementById("job-details").value = report.jobDetails || "";
+    }
     document.getElementById("recommendations").value = report.recommendations || "";
     
     // Prefill CM fields
@@ -2700,6 +2717,7 @@ function cancelEditMode() {
     
     // Reset form
     document.getElementById("report-form").reset();
+    if (document.getElementById("job-details")) document.getElementById("job-details").value = "";
     resetTechnicianFormState();
     document.getElementById("maintenance-date").value = new Date().toISOString().split('T')[0];
     currentImagesInverterRoom = [];
@@ -3356,6 +3374,7 @@ function proceedWithUpload(report, webhookUrl, scaleVal, qualityVal, windowWidth
                     serviceType: sType,
                     technicians: report.technicianName || "-",
                     status: report.maintenanceType === "Corrective Maintenance" ? (report.cmStatus || "Completed") : "Normal",
+                    jobDetails: report.jobDetails || "-",
                     recommendations: report.recommendations || "ระบบอยู่ในเกณฑ์สมบูรณ์"
                 }
             };
@@ -3955,6 +3974,7 @@ function proceedWithUpload(report, webhookUrl, scaleVal, qualityVal, windowWidth
                     serviceType: sType,
                     technicians: report.technicianName || "-",
                     status: report.maintenanceType === "Corrective Maintenance" ? (report.cmStatus || "Completed") : "Normal",
+                    jobDetails: report.jobDetails || "-",
                     recommendations: report.recommendations || "ระบบอยู่ในเกณฑ์สมบูรณ์"
                 }
             };
@@ -4077,6 +4097,7 @@ function proceedWithManualUpload(report, webhookUrl, base64Pdf) {
             serviceType: sType,
             technicians: report.technicianName || "-",
             status: report.maintenanceType === "Corrective Maintenance" ? (report.cmStatus || "Completed") : "Normal",
+            jobDetails: report.jobDetails || "-",
             recommendations: report.recommendations || "ระบบอยู่ในเกณฑ์สมบูรณ์"
         }
     };
@@ -4718,98 +4739,112 @@ const teamIdCardsMaster = {
         idCard: "1180501113786",
         phone: "083-9411741",
         image: "assets/team_idcards/id_tharadon.jpg",
-        certImage: "assets/team_certs/cert_tharadon.jpg"
+        certImage: "assets/team_certs/cert_tharadon.jpg",
+        certNo: "C030-40052026"
     },
     "นิธิกุล ค่อมสิงห์": {
         nickname: "แบงค์น้อย",
         idCard: "1400700204703",
         phone: "083-5607583",
         image: "assets/team_idcards/id_nithikun.jpg",
-        certImage: "assets/team_certs/cert_nithikun.jpg"
+        certImage: "assets/team_certs/cert_nithikun.jpg",
+        certNo: "C030-50062025"
     },
     "ชุติพนธ์ โรจน์เจริญ": {
         nickname: "บอส",
         idCard: "1409901821295",
         phone: "092-1549484",
         image: "assets/team_idcards/id_chutipon.jpg",
-        certImage: "assets/team_certs/cert_chutipon.jpg"
+        certImage: "assets/team_certs/cert_chutipon.jpg",
+        certNo: "C030-49062025"
     },
     "ณัฐพงษ์ ภักโสภา": {
         nickname: "เอิร์ท",
         idCard: "1409901425420",
         phone: "097-2195192",
         image: "assets/team_idcards/id_nattapong_p.jpg",
-        certImage: "assets/team_certs/cert_nattapong_p.jpg"
+        certImage: "assets/team_certs/cert_nattapong_p.jpg",
+        certNo: "C030-52062025"
     },
     "ทินกร บุญฤทธิ์": {
         nickname: "โจ",
         idCard: "1440500160516",
         phone: "064-5633436",
         image: "assets/team_idcards/id_tinnakorn.jpg",
-        certImage: "assets/team_certs/cert_tinnakorn.jpg"
+        certImage: "assets/team_certs/cert_tinnakorn.jpg",
+        certNo: "C030-01102023"
     },
     "ปิติชัย ศรีสุนนท์": {
         nickname: "แบงค์",
         idCard: "1409903097012",
         phone: "095-6632197",
         image: "assets/team_idcards/id_pitichai.jpg",
-        certImage: "assets/team_certs/cert_pitichai.jpg"
+        certImage: "assets/team_certs/cert_pitichai.jpg",
+        certNo: "C030-16092025"
     },
     "นุชนาฏ คำผุย": {
         nickname: "ตาล",
         idCard: "1400800098824",
         phone: "095-2925300",
         image: "assets/team_idcards/id_nutchanat.jpg",
-        certImage: "assets/team_certs/cert_nutchanat.jpg"
+        certImage: "assets/team_certs/cert_nutchanat.jpg",
+        certNo: "C030-51062025"
     },
     "นุชนาฎ คำผุย": {
         nickname: "ตาล",
         idCard: "1400800098824",
         phone: "095-2925300",
         image: "assets/team_idcards/id_nutchanat.jpg",
-        certImage: "assets/team_certs/cert_nutchanat.jpg"
+        certImage: "assets/team_certs/cert_nutchanat.jpg",
+        certNo: "C030-51062025"
     },
     "ชิตชนก ช่างไม้": {
         nickname: "อั้ม",
         idCard: "1401701232604",
         phone: "095-2925300",
         image: "assets/team_idcards/id_chitchanok.jpg",
-        certImage: ""
+        certImage: "",
+        certNo: "-"
     },
     "พงษ์พิพัฒน์ โปรถนัด": {
         nickname: "เต๋า",
         idCard: "1420800064903",
         phone: "094-2954442",
         image: "assets/team_idcards/id_pongpipat.jpg",
-        certImage: "assets/team_certs/cert_pongpipat.jpg"
+        certImage: "assets/team_certs/cert_pongpipat.jpg",
+        certNo: "C030-36062025"
     },
     "พงษ์ภิวัฒน์ โปรถนัด": {
         nickname: "เต๋า",
         idCard: "1420800064903",
         phone: "094-2954442",
         image: "assets/team_idcards/id_pongpipat.jpg",
-        certImage: "assets/team_certs/cert_pongpipat.jpg"
+        certImage: "assets/team_certs/cert_pongpipat.jpg",
+        certNo: "C030-36062025"
     },
     "พรชัย สุภาษร": {
         nickname: "พรชัย",
         idCard: "1349901165968",
         phone: "064-3358286",
         image: "assets/team_idcards/id_pornchai.jpg",
-        certImage: "assets/team_certs/cert_pornchai.jpg"
+        certImage: "assets/team_certs/cert_pornchai.jpg",
+        certNo: "C030-25052024"
     },
     "พัฒน์สุวิชญ์ ช่างปรุง": {
         nickname: "พัฒน์",
         idCard: "1709901371637",
         phone: "093-0086423",
         image: "assets/team_idcards/id_pattanasuwith.jpg",
-        certImage: "assets/team_certs/cert_pattanasuwith.jpg"
+        certImage: "assets/team_certs/cert_pattanasuwith.jpg",
+        certNo: "C030-46052026"
     },
     "อรุณ ฝ่ายแก้ว": {
         nickname: "อรุณ",
         idCard: "1409901538305",
         phone: "094-1931170",
         image: "assets/team_idcards/id_arun.jpg",
-        certImage: ""
+        certImage: "",
+        certNo: "-"
     }
 };
 
@@ -4836,11 +4871,11 @@ function getMemberIdCardInfo(name) {
         for (const m of teamMembersList) {
             const mClean = (m.name || "").replace(/^นาย\s*|^นางสาว\s*|^น\.ส\.\s*/, "").trim();
             if (mClean === clean || m.name === raw) {
-                return { found: true, name: m.name, idCard: m.idCard || "", phone: m.phone || "", image: "" };
+                return { found: true, name: m.name, idCard: m.idCard || "", phone: m.phone || "", image: "", certNo: m.certNo || "-" };
             }
         }
     }
-    return { found: false };
+    return { found: false, certNo: "-" };
 }
 
 function showIdCardViewer(title, imageUrl, subtitle = "") {
@@ -4886,16 +4921,17 @@ function populateWpTeamMembersDatalist() {
 }
 
 // Worker Rows in Modal Form (With ID Card & Height Cert Autoload & Attachment)
-function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardImage = "", certImage = "") {
+function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardImage = "", certImage = "", certNo = "") {
     const tbody = document.getElementById("wp-workers-tbody");
     if (!tbody) return;
 
     // Auto-detect ID card image, height cert, and info if initial values are empty
-    if (name && (!idCardImage || !certImage)) {
+    if (name && (!idCardImage || !certImage || !certNo)) {
         const info = getMemberIdCardInfo(name);
         if (info.found) {
             if (!idCardImage && info.image) idCardImage = info.image;
             if (!certImage && info.certImage) certImage = info.certImage;
+            if (!certNo && info.certNo) certNo = info.certNo;
             if (!idCard || idCard === "-") idCard = info.idCard || "";
             if (!phone || phone === "-") phone = info.phone || "";
         }
@@ -4907,6 +4943,7 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
     tr.style.borderBottom = "1px solid var(--border-color)";
     tr.dataset.idCardImage = idCardImage || "";
     tr.dataset.certImage = certImage || "";
+    tr.dataset.certNo = certNo || "";
 
     tr.innerHTML = `
         <td style="padding: 6px; text-align: center; color: var(--text-muted); font-weight: 600;" class="wp-worker-seq">${rowCount}</td>
@@ -5052,6 +5089,9 @@ function addWorkerRow(name = "", idCard = "", phone = "", remark = "", idCardIma
                 tr.dataset.certImage = info.certImage;
                 renderCertCell();
             }
+            if (info.certNo) {
+                tr.dataset.certNo = info.certNo;
+            }
         }
     });
 
@@ -5111,7 +5151,7 @@ function importTeamToWorkers() {
     Object.keys(teamIdCardsMaster).forEach(k => {
         const data = teamIdCardsMaster[k];
         if (!existingNames.includes(k)) {
-            addWorkerRow(k, data.idCard || "-", data.phone || "-", "", data.image || "", data.certImage || "");
+            addWorkerRow(k, data.idCard || "-", data.phone || "-", "", data.image || "", data.certImage || "", data.certNo || "-");
             existingNames.push(k);
             addedCount++;
         }
@@ -5331,9 +5371,9 @@ function openEditWorkPermitModal(id) {
     const workersTbody = document.getElementById("wp-workers-tbody");
     workersTbody.innerHTML = "";
     if (wp.workers && wp.workers.length > 0) {
-        wp.workers.forEach(w => addWorkerRow(w.name, w.idCard, w.phone, w.remark, w.idCardImage, w.certImage));
+        wp.workers.forEach(w => addWorkerRow(w.name, w.idCard, w.phone, w.remark, w.idCardImage, w.certImage, w.certNo || ""));
     } else {
-        addWorkerRow("", "", "", "", "", "");
+        addWorkerRow("", "", "", "", "", "", "");
     }
 
     modal.style.display = "flex";
@@ -5446,29 +5486,23 @@ function viewWorkPermitPrint(id) {
     workerTbody.innerHTML = "";
     if (wp.workers && wp.workers.length > 0) {
         wp.workers.forEach((w, idx) => {
-            let idImg = w.idCardImage;
-            let certImg = w.certImage;
-            if (!idImg || !certImg) {
+            let certNo = w.certNo;
+            if (!certNo || certNo === "-") {
                 const info = getMemberIdCardInfo(w.name);
-                if (info.found) {
-                    if (!idImg && info.image) idImg = info.image;
-                    if (!certImg && info.certImage) certImg = info.certImage;
+                if (info && info.found && info.certNo) {
+                    certNo = info.certNo;
                 }
             }
+            if (!certNo) certNo = "-";
 
             const tr = document.createElement("tr");
             tr.innerHTML = `
                 <td style="text-align: center;">${idx + 1}</td>
                 <td><strong>${w.name || '-'}</strong></td>
-                <td style="text-align: center; vertical-align: middle; padding: 3px 4px;">
-                    <div style="display: flex; align-items: center; justify-content: center; gap: 5px;">
-                        ${idImg ? `<img src="${idImg}" alt="บัตร" style="height: 22px; width: 34px; object-fit: cover; border-radius: 2px; border: 1px solid #cbd5e1; cursor: pointer;" title="คลิกเพื่อดูบัตร ปชช. ขยาย" onclick="showIdCardViewer('สำเนาบัตรประชาชน - ${w.name}', '${idImg}', '${w.idCard || ''}')">` : `<span style="font-size: 7pt; color: #94a3b8;">-</span>`}
-                        ${certImg ? `<img src="${certImg}" alt="ใบเซอร์" style="height: 30px; width: 22px; object-fit: cover; border-radius: 2px; border: 1px solid #cbd5e1; cursor: pointer;" title="คลิกเพื่อดูใบเซอร์ที่สูงขยาย" onclick="showIdCardViewer('ใบรับรองการอบรมที่สูง - ${w.name}', '${certImg}', 'หลักสูตรเทคนิคการปฏิบัติงานที่สูงอย่างปลอดภัย')">` : `<span style="font-size: 7pt; color: #94a3b8;">-</span>`}
-                    </div>
-                </td>
-                <td style="font-family: monospace; letter-spacing: 0.5px;">${w.idCard || '-'}</td>
-                <td>${w.phone || '-'}</td>
-                <td>${w.remark || '-'}</td>
+                <td style="text-align: center; font-family: monospace; letter-spacing: 0.5px;">${w.idCard || '-'}</td>
+                <td style="text-align: center; font-family: monospace; font-weight: 700; color: #0f172a;">${certNo}</td>
+                <td style="text-align: center;">${w.phone || '-'}</td>
+                <td style="text-align: center;">${w.remark || '-'}</td>
             `;
             workerTbody.appendChild(tr);
         });
@@ -5625,6 +5659,7 @@ function renderPrintCertAttachments(wp) {
 
         const grid = pageEl.querySelector(".wp-cert-grid");
         pageWorkers.forEach((w, idx) => {
+            const certNoDisplay = w.certNo || (getMemberIdCardInfo(w.name)?.certNo) || "-";
             const cardItem = document.createElement("div");
             cardItem.className = "wp-cert-item-card";
             cardItem.innerHTML = `
@@ -5632,7 +5667,9 @@ function renderPrintCertAttachments(wp) {
                     <div>
                         <strong style="font-size: 9.5pt; color: #0f172a;">${(pageIdx * cardsPerPage) + idx + 1}. ${w.name}</strong>
                     </div>
-                    <span style="font-size: 8.5pt; color: #2563eb; font-weight: 600;">หลักสูตรปฏิบัติงานที่สูงอย่างปลอดภัย</span>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 8pt; font-family: monospace; font-weight: 700; color: #1e3a8a; background: #eff6ff; padding: 2px 6px; border-radius: 4px; border: 1px solid #bfdbfe;">เลขที่: ${certNoDisplay}</span>
+                    </div>
                 </div>
                 <img src="${w.img}" alt="ใบเซอร์ ${w.name}" style="cursor: pointer;" title="คลิกเพื่อดูรูปขยาย">
             `;
@@ -5882,10 +5919,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 const name = tr.querySelector(".wp-worker-name")?.value.trim();
                 const idCard = tr.querySelector(".wp-worker-idcard")?.value.trim();
                 const phone = tr.querySelector(".wp-worker-phone")?.value.trim();
-                const remark = tr.querySelector(".wp-worker-remark")?.value.trim();
                 const idCardImage = tr.dataset.idCardImage || "";
                 const certImage = tr.dataset.certImage || "";
-                if (name) workers.push({ seq: idx + 1, name, idCard, phone, remark, idCardImage, certImage });
+                let certNo = tr.dataset.certNo || "";
+                if (!certNo) {
+                    const info = getMemberIdCardInfo(name);
+                    if (info && info.certNo) certNo = info.certNo;
+                }
+                if (name) workers.push({ seq: idx + 1, name, idCard, phone, remark, idCardImage, certImage, certNo: certNo || "-" });
             });
 
             if (supervisors.length === 0) {

@@ -1458,6 +1458,27 @@ input[type="range"]::-webkit-slider-thumb:hover {
     white-space: pre-wrap;
 }
 
+.job-details-box-print {
+    border: 1.5px solid #cbd5e1;
+    border-left: 4px solid #b45309;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    background-color: #f8fafc;
+}
+
+.job-details-box-print h4 {
+    margin-bottom: 6px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.job-details-box-print p {
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: #334155;
+}
+
 .print-photo-gallery {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -1593,6 +1614,8 @@ input[type="range"]::-webkit-slider-thumb:hover {
     .print-summary-inverter-card,
     .print-photo-item,
     .print-sign-off,
+    #print-job-details-section,
+    .job-details-box-print,
     .checklist-print-table tr,
     .print-inverter-block {
         page-break-inside: avoid !important;
@@ -2320,6 +2343,8 @@ body[data-layout="floating-hero"] #tab-dashboard .kpi-grid {
 .rendering-pdf .print-section,
 .rendering-pdf .print-summary-inverter-card,
 .rendering-pdf .print-photo-item,
+.rendering-pdf #print-job-details-section,
+.rendering-pdf .job-details-box-print,
 .rendering-pdf .print-sign-off {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
@@ -2397,12 +2422,32 @@ body[data-layout="floating-hero"] #tab-dashboard .kpi-grid {
 /* ==========================================
    WORK PERMIT (ใบขออนุญาตเข้าทำงาน) STYLES
    ========================================== */
-.wp-paper {
+.wp-print-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.wp-attachment-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.wp-paper,
+.wp-paper.wp-main-page {
     background: #ffffff !important;
     color: #0f172a !important;
-    max-width: 210mm;
+    width: 210mm;
+    max-width: 100%;
+    min-height: 297mm;
     margin: 1.5rem auto;
-    padding: 15mm 15mm;
+    padding: 12mm 14mm;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     border-radius: 4px;
     font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
@@ -2535,13 +2580,25 @@ body[data-layout="floating-hero"] #tab-dashboard .kpi-grid {
 }
 
 @media print {
-    .wp-paper {
+    .wp-print-wrapper,
+    .wp-attachment-container {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        gap: 0 !important;
+    }
+
+    .wp-paper,
+    .wp-paper.wp-main-page {
         margin: 0 !important;
         padding: 0 !important;
         max-width: 100% !important;
         width: 100% !important;
         box-shadow: none !important;
         border: none !important;
+        page-break-after: always !important;
+        break-after: page !important;
     }
 }
 
